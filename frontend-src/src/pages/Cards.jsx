@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SquarePen, Upload, X } from "lucide-react";
+import { SquarePen, Upload, X, Trash2 } from "lucide-react";
 import CarouselCard from "../components/CarouselCard";
 import Header from "../components/Header";
 import Input from "../components/Input";
@@ -19,6 +19,19 @@ import {
 
 const allowedPngTypes = ["image/png", "application/png", "application/octet-stream", ""];
 
+const getLocalApiBase = () => {
+
+  const configuredBase =
+    typeof process !== "undefined" ? process.env.REACT_APP_API_URL : "";
+  if (configuredBase) return configuredBase.replace(/\/$/, "");
+
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(
+    window.location.hostname,
+  );
+
+  return isLocalHost ? `http://${window.location.hostname}:5000` : "";
+};
+
 const isValidPngFile = (file) => {
   if (!file) return true;
 
@@ -32,8 +45,25 @@ const updateCourseRequest = (idCurso, formData) =>
     body: formData,
   });
 
+const deleteCourseRequest = async (id) => {
+  const cursoId = encodeURIComponent(String(id));
+  const options = {
+    method: "DELETE",
+    credentials: "include",
+  };
+  const response = await fetch(`/api/cursos/${cursoId}`, options);
+
+  if (response.status !== 404) return response;
+
+  const localApiBase = getLocalApiBase();
+  if (!localApiBase) return response;
+
+  return fetch(`${localApiBase}/api/cursos/${cursoId}`, options);
+};
+
 const Cards = () => {
   const [cursos, setCursos] = useState([]);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [editingCourse, setEditingCourse] = useState(null);
@@ -133,13 +163,13 @@ const Cards = () => {
 
   const cursosBase = activeCollection
     ? cursos.filter((curso) =>
-        courseStartsWithPrefix(curso, activeCollection.prefix),
-      )
+      courseStartsWithPrefix(curso, activeCollection.prefix),
+    )
     : cursos;
   const cursosFiltrados = q
     ? cursosBase.filter((curso) =>
-        normalizeCourseText(curso.titulo || "").includes(q),
-      )
+      normalizeCourseText(curso.titulo || "").includes(q),
+    )
     : cursosBase;
 
   if (loading) {
@@ -150,6 +180,37 @@ const Cards = () => {
         </h1>
       </main>
     );
+  }
+
+  async function deletarCurso(id) {
+    if (!canManageCourses || id === null || id === undefined) return;
+
+    const confirmed = window.confirm("Deseja realmente deletar este curso?");
+    if (!confirmed) return;
+
+    try {
+      setError("");
+
+      const response = await deleteCourseRequest(id);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setError(
+          data.error || data.message || "Nao foi possivel deletar o curso.",
+        );
+        return;
+      }
+
+      const cursoId = String(id);
+      // Remove o curso da tela somente depois que o backend confirma o DELETE.
+      setCursos((prev) =>
+        prev.filter((curso) => String(curso.id) !== cursoId),
+      );
+
+    } catch (error) {
+      console.error("Erro ao deletar curso:", error);
+      setError("Erro ao conectar ao servidor.");
+    }
   }
 
   return (
@@ -242,6 +303,12 @@ const Cards = () => {
           </p>
         )}
 
+        {error && (
+          <p className="mt-4 text-sm font-semibold text-[#B95758]">
+            {error}
+          </p>
+        )}
+
         <div className="mt-6 flex w-full max-w-screen-xl flex-wrap justify-center gap-5">
           {cursosFiltrados.map((curso) => (
             <div key={curso.id} className="relative w-80">
@@ -253,12 +320,29 @@ const Cards = () => {
                   onClick={() => startCourseEdit(curso)}
                   aria-label={`Editar curso ${curso.titulo}`}
                   title="Editar curso"
-                  className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-[#B95758] shadow-sm transition hover:bg-[#F0F0E9] hover:text-[#9f3f40]"
+                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-[#B95758] shadow-sm transition hover:bg-[#F0F0E9] hover:text-[#9f3f40]"
                 >
                   <SquarePen className="h-4 w-4" strokeWidth={2.4} />
                 </button>
+
+              )}
+
+              {canManageCourses && (
+                <button
+                  type="button"
+                  onClick={() => deletarCurso(curso.id)}
+                  className="absolute top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white"
+                  style={{ right: "3.75rem" }}
+                  aria-label={`Deletar curso ${curso.titulo}`}
+                  title="Deletar curso"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={2.4} />
+                </button>
+
               )}
             </div>
+
+
           ))}
 
           {!cursosFiltrados.length && (

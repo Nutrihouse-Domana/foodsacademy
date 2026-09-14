@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { SquarePen, Upload, X } from "lucide-react";
+import { SquarePen, Upload, X, Trash2 } from "lucide-react";
 import backgroundImage from "../assets/background_teknisa_page.png";
 import CarouselCard from "../components/CarouselCard";
 import Chatbot from "../components/Chatbot";
@@ -31,6 +31,10 @@ const updateCourseRequest = (idCurso, formData) =>
     body: formData,
   });
 
+const deleteCourseRequest = (idCurso) =>
+  fetchJson(`/api/cursos/${encodeURIComponent(String(idCurso))}`, {
+    method: "DELETE",
+  });
 const Home = () => {
   const [page, setPage] = useState(0);
   const [cursos, setCursos] = useState([]);
@@ -40,6 +44,7 @@ const Home = () => {
   const [editCourseIconFile, setEditCourseIconFile] = useState(null);
   const [editCourseError, setEditCourseError] = useState("");
   const [editCourseSuccess, setEditCourseSuccess] = useState("");
+  const [courseActionError, setCourseActionError] = useState("");
   const [updatingCourse, setUpdatingCourse] = useState(false);
   const editCourseFileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -126,6 +131,27 @@ const Home = () => {
     }
   };
 
+  async function deletarCurso(id) {
+    if (!canManageCourses || id === null || id === undefined) return;
+
+    const confirmed = window.confirm("Deseja realmente deletar este curso?");
+    if (!confirmed) return;
+
+    try {
+      setCourseActionError("");
+
+      await deleteCourseRequest(id);
+
+      const cursoId = String(id);
+      // Remove o curso da tela somente depois que o backend confirma o DELETE.
+      setCursos((prev) =>
+        prev.filter((curso) => String(curso.id) !== cursoId),
+      );
+    } catch (error) {
+      console.error("Erro ao deletar curso:", error);
+      setCourseActionError(error.message || "Nao foi possivel deletar o curso.");
+    }
+  }
   const cards = useMemo(() => {
 
     const collectionCards = COURSE_COLLECTIONS.map((collection) => {
@@ -279,6 +305,11 @@ const Home = () => {
             </p>
           )}
 
+          {courseActionError && (
+            <p className="mb-4 text-center text-sm font-semibold text-[#B95758]">
+              {courseActionError}
+            </p>
+          )}
           <div className="relative mt-1 flex w-full items-center justify-center">
             <button
               onClick={() => goPage(-1)}
@@ -312,9 +343,21 @@ const Home = () => {
                         onClick={() => startCourseEdit(curso)}
                         aria-label={`Editar curso ${curso.titulo}`}
                         title="Editar curso"
-                        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-[#B95758] shadow-sm transition hover:bg-[#F0F0E9] hover:text-[#9f3f40]"
+                        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-[#B95758] shadow-sm transition hover:bg-[#F0F0E9] hover:text-[#9f3f40]"
                       >
                         <SquarePen className="h-4 w-4" strokeWidth={2.4} />
+                      </button>
+                    )}
+                    {canManageCourses && curso.type === "course" && (
+                      <button
+                        type="button"
+                        onClick={() => deletarCurso(curso.id)}
+                        aria-label={`Deletar curso ${curso.titulo}`}
+                        title="Deletar curso"
+                        className="absolute top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white"
+                        style={{ right: "3.75rem" }}
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={2.4} />
                       </button>
                     )}
                   </div>

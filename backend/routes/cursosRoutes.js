@@ -6,7 +6,7 @@ const { query, sql } = require('../db');
 const asyncRoute = require('./asyncRoute');
 
 const router = express.Router();
-const cursoFields = 'id, titulo, caminho, icon, caminho_icon';
+const cursoFields = 'id, titulo, caminho, icon, caminho_icon, ativo';
 const publicRootDir = path.join(__dirname, '..', '..');
 const videosCursosDir = path.join(publicRootDir, 'videos_cursos');
 const iconesDir = path.join(publicRootDir, 'icons_cursos');
@@ -143,7 +143,7 @@ const removeIconFile = async (fileName) => {
 router.get(
   '/cursos',
   asyncRoute('Erro ao buscar cursos', async (req, res) => {
-    const cursos = await query(`SELECT ${cursoFields} FROM cursos`);
+    const cursos = await query(`SELECT ${cursoFields} FROM cursos WHERE ISNULL(ativo, 1) = 1`);
     res.json(cursos.map(withIcon));
   })
 );
@@ -158,10 +158,40 @@ router.get(
     }
 
     const params = { id: [sql.Int, idCurso] };
-    const [curso] = await query(`SELECT titulo FROM cursos WHERE id = @id`, params);
+    const [curso] = await query(
+      `SELECT titulo FROM cursos WHERE id = @id AND ISNULL(ativo, 1) = 1`,
+      params
+    );
 
     if (!curso) return res.status(404).json({ error: 'Curso nao encontrado.' });
     res.json(curso);
+  })
+);
+
+router.delete(
+  '/cursos/:id',
+  requireAdmin,
+  asyncRoute('Erro ao desativar curso', async (req, res) => {
+    const idCurso = Number(req.params.id);
+
+    if (!Number.isInteger(idCurso) || idCurso <= 0) {
+      return res.status(400).json({ error: 'ID do curso invalido.' });
+    }
+
+    const params = { id: [sql.Int, idCurso] };
+    const [curso] = await query(
+      `UPDATE cursos
+       SET ativo = 0
+       OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon, INSERTED.ativo
+       WHERE id = @id`,
+      params
+    );
+
+    if (!curso) return res.status(404).json({ error: 'Curso nao encontrado.' });
+    res.json({
+      message: 'Curso desativado com sucesso.',
+      curso: withIcon(curso),
+    });
   })
 );
 
@@ -211,9 +241,9 @@ router.post(
       };
 
       const [cursoCriado] = await query(
-        `INSERT INTO cursos (titulo, caminho, icon, caminho_icon)
-         OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon
-         VALUES (@titulo, @caminho, @icon, @caminho_icon)`,
+        `INSERT INTO cursos (titulo, caminho, icon, caminho_icon, ativo)
+         OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon, INSERTED.ativo
+         VALUES (@titulo, @caminho, @icon, @caminho_icon, 1)`,
         params
       );
 
@@ -268,7 +298,7 @@ router.put(
 
       let updateSql = `UPDATE cursos
         SET titulo = @titulo
-        OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon, DELETED.icon AS icon_anterior
+        OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon, INSERTED.ativo, DELETED.icon AS icon_anterior
         WHERE id = @id`;
 
       if (nextIcon) {
@@ -278,7 +308,7 @@ router.put(
         // Mantem o caminho do curso para preservar pastas, videos e materiais ja publicados.
         updateSql = `UPDATE cursos
           SET titulo = @titulo, icon = @icon, caminho_icon = @caminho_icon
-          OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon, DELETED.icon AS icon_anterior
+          OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon, INSERTED.ativo, DELETED.icon AS icon_anterior
           WHERE id = @id`;
       }
 
