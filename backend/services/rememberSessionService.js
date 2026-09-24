@@ -8,6 +8,8 @@ let runtimeSecret;
 
 const env = (name) => String(process.env[name] || '').trim();
 
+const toBoolean = (value) => value === true || String(value).trim().toLowerCase() === 'true';
+
 const b64 = (value) => Buffer.from(value).toString('base64url');
 
 const fromB64 = (value) => Buffer.from(value, 'base64url').toString('utf8');
@@ -71,7 +73,7 @@ const createRememberSessionToken = (username, isAdmin = false, nomeCompleto = ''
     JSON.stringify({
       username,
       nomeCompleto,
-      isAdmin: isAdmin === true,
+      isAdmin: toBoolean(isAdmin),
       exp: Date.now() + getMaxAgeMs(),
     })
   );
@@ -93,7 +95,7 @@ const verifyRememberSessionToken = (token) => {
           username: username.trim(),
           nomeCompleto:
             typeof nomeCompleto === 'string' ? nomeCompleto.trim() : '',
-          isAdmin: isAdmin === true,
+          isAdmin: toBoolean(isAdmin),
         }
       : null;
   } catch {

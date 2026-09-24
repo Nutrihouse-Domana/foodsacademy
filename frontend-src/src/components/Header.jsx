@@ -229,8 +229,16 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
           </div>
         </div>
       </div>
-      {showInput && (
-        <div className="mx-auto max-w-screen-xl px-4 pb-3 lg:px-6">
+      <div
+        aria-hidden={!showInput}
+        inert={!showInput ? "" : undefined}
+        className={`mx-auto max-w-screen-xl transform-gpu overflow-hidden px-4 transition-all duration-400 ease-in-out lg:px-6 ${
+          showInput
+            ? "max-h-[360px] pb-3 opacity-100 translate-y-0 lg:max-h-[190px]"
+            : "pointer-events-none max-h-0 pb-0 translate-y-4 opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
           <section className="rounded-lg border border-black/10 border-l-4 border-l-[#B95758] bg-white/95 p-3 shadow-sm backdrop-blur sm:p-4">
             <form
               className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.9fr)_auto] lg:items-end"
@@ -286,7 +294,7 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
             )}
           </section>
         </div>
-      )}
+      </div>
     </header>
   );
 };

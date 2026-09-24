@@ -14,6 +14,7 @@ import {
 import {
   asArray,
   fetchJson,
+  isActiveCourse,
   withCourseIcon,
 } from "../utils/app";
 
@@ -80,11 +81,15 @@ const Cards = () => {
   const activeCollection = getCourseCollection(searchParams.get("collection"));
 
   useEffect(() => {
-    fetchJson("/api/cursos")
+    // Admins pedem inativos explicitamente para manter os cards desativados visiveis.
+    const cursosEndpoint = canManageCourses ? "/api/cursos?includeInactive=1" : "/api/cursos";
+
+    setLoading(true);
+    fetchJson(cursosEndpoint)
       .then((data) => setCursos(asArray(data).map(withCourseIcon)))
       .catch((error) => console.error("Erro ao carregar cursos:", error))
       .finally(() => setLoading(false));
-  }, []);
+  }, [canManageCourses]);
 
   const resetCourseEdit = () => {
     setEditingCourse(null);
@@ -161,11 +166,14 @@ const Cards = () => {
 
   const q = normalizeCourseText(search.trim());
 
+  // Usuarios comuns nao veem cursos inativos; admins continuam vendo todos.
+  const cursosVisiveis = canManageCourses ? cursos : cursos.filter(isActiveCourse);
+
   const cursosBase = activeCollection
-    ? cursos.filter((curso) =>
+    ? cursosVisiveis.filter((curso) =>
       courseStartsWithPrefix(curso, activeCollection.prefix),
     )
-    : cursos;
+    : cursosVisiveis;
   const cursosFiltrados = q
     ? cursosBase.filter((curso) =>
       normalizeCourseText(curso.titulo || "").includes(q),
@@ -201,10 +209,17 @@ const Cards = () => {
         return;
       }
 
+      if (data.curso) {
+        upsertCourse(data.curso);
+        return;
+      }
+
       const cursoId = String(id);
-      // Remove o curso da tela somente depois que o backend confirma o DELETE.
+      // O DELETE desativa o curso; admins continuam vendo o card inativo.
       setCursos((prev) =>
-        prev.filter((curso) => String(curso.id) !== cursoId),
+        prev.map((curso) =>
+          String(curso.id) === cursoId ? { ...curso, ativo: 0 } : curso,
+        ),
       );
 
     } catch (error) {
@@ -232,7 +247,17 @@ const Cards = () => {
           {activeCollection ? activeCollection.title : "Todos os Cursos"}
         </h1>
 
-        {canManageCourses && editingCourse && (
+        {canManageCourses && (
+          <div
+            aria-hidden={!editingCourse}
+            inert={!editingCourse ? "" : undefined}
+            className={`transform-gpu overflow-hidden transition-all duration-1000 ease-in-out ${
+              editingCourse
+                ? "max-h-[420px] opacity-100 translate-y-0 lg:max-h-[190px]"
+                : "pointer-events-none max-h-0 translate-y-4 opacity-0"
+            }`}
+          >
+            <div className="overflow-hidden">
           <section className="mt-5 w-full max-w-screen-xl rounded-md border border-black/10 border-l-4 border-l-[#B95758] bg-white/95 p-4 shadow-sm backdrop-blur">
             <form
               className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)_auto_auto] lg:items-end"
@@ -295,6 +320,8 @@ const Cards = () => {
               </p>
             )}
           </section>
+            </div>
+          </div>
         )}
 
         {!editingCourse && editCourseSuccess && (
@@ -312,7 +339,7 @@ const Cards = () => {
         <div className="mt-6 flex w-full max-w-screen-xl flex-wrap justify-center gap-5">
           {cursosFiltrados.map((curso) => (
             <div key={curso.id} className="relative w-80">
-              <CarouselCard {...curso} title={curso.titulo} />
+              <CarouselCard {...curso} title={curso.titulo} ativo={curso.ativo} />
 
               {canManageCourses && (
                 <button

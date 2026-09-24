@@ -32,6 +32,22 @@ export function asArray(data) {
   return Array.isArray(data) ? data : [];
 }
 
+
+const inactiveCourseValues = new Set(["0", "false", "inativo", "inactive", "nao", "no", "n"]);
+
+export function isActiveCourse(courseOrValue) {
+  const value = courseOrValue && typeof courseOrValue === "object"
+    ? courseOrValue.ativo
+    : courseOrValue;
+
+  if (value === undefined || value === null || value === "") return true;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+
+  // Normaliza valores vindos do backend para ocultar inativos dos usuarios comuns.
+  return !inactiveCourseValues.has(String(value).trim().toLowerCase());
+}
+
 export function getStoredUsername() {
   return localStorage.getItem(USERNAME_STORAGE_KEY) || "Usuario";
 }

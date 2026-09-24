@@ -4,9 +4,9 @@ import Icon from "../components/Icon";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useUsuario } from "../contexts/UsuarioContext";
-import { CirclePlus } from "lucide-react";
+import { CirclePlus, HeartPlus, SquarePen, Trash2 } from "lucide-react";
 import Input from "../components/Input";
-import { Trash2, HeartPlus, SquarePen } from "lucide-react";
+import ExportButton from "../components/ExcelButton";
 
 const PAGE_SIZE = 10;
 const FAVORITES_STORAGE_PREFIX = "contatosFavoritos";
@@ -166,7 +166,7 @@ function Contatos() {
   const [ddd, setDdd] = useState("");
   const [numero, setNumero] = useState("");
   const [tipo, setTipo] = useState("");
-  const [departamento, setDepartmento] = useState("");
+  const [departamento, setDepartamento] = useState("");
   const [contacts, setContacts] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -175,7 +175,6 @@ function Contatos() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [showInput, setShowInput] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -271,10 +270,6 @@ function Contatos() {
     currentPage * PAGE_SIZE,
   );
 
-  const closeAnd = (action) => {
-    setIsMobileOpen(false);
-    action();
-  };
 
   useEffect(() => {
     setPage(1);
@@ -289,15 +284,14 @@ function Contatos() {
     setTimeout(() => setCopiedId(null), 1600);
   }
 
-  const voltar = () =>
-    closeAnd(() => {
-      if ((window.history.state?.idx ?? 0) > 0) {
-        navigate(-1);
-        return;
-      }
+  const voltar = () => {
+    if ((window.history.state?.idx ?? 0) > 0) {
+      navigate(-1);
+      return;
+    }
 
-      navigate("/home");
-    });
+    navigate("/home");
+  };
 
   function toggleFavorito(id) {
     if (id === null || id === undefined) return;
@@ -357,7 +351,7 @@ function Contatos() {
       setDdd("");
       setNumero("");
       setTipo("");
-      setDepartmento("");
+      setDepartamento("");
     } else {
       setShowInput(!showInput);
     }
@@ -380,7 +374,7 @@ function Contatos() {
       setDdd(telefoneSemPais.slice(0, 2));
       setNumero(telefoneSemPais.slice(2));
       setTipo(contact.tipo);
-      setDepartmento(contact.departamento);
+      setDepartamento(contact.departamento);
     } catch (error) {
       console.log(error);
     }
@@ -483,7 +477,7 @@ function Contatos() {
         setDdd("");
         setNumero("");
         setTipo("");
-        setDepartmento("");
+        setDepartamento("");
         setEditingId(null);
         setShowInput(false);
 
@@ -522,7 +516,7 @@ function Contatos() {
       setDdd("");
       setNumero("");
       setTipo("");
-      setDepartmento("");
+      setDepartamento("");
       setEditingId(null);
       setShowInput(false);
 
@@ -565,10 +559,10 @@ function Contatos() {
         <section className="relative z-10 mx-auto flex w-full max-w-[1190px] flex-col gap-3">
 
           <div
-            className={`grid gap-3 pt-3 ${
+            className={`grid items-center gap-3 pt-3 ${
               isAdmin
-                ? "md:grid-cols-[auto_1fr_260px_auto]"
-                : "md:grid-cols-[auto_1fr_260px]"
+                ? "md:grid-cols-[auto_1fr_260px_auto_auto]"
+                : "md:grid-cols-[auto_1fr_260px_auto]"
             }`}
           >
 
@@ -616,21 +610,34 @@ function Contatos() {
               </select>
             </label>
             {isAdmin && (
+              <>
               <button
                 type="button"
                 onClick={showInputs}
                 aria-label="Adicionar contato"
+                title="Novo contato"
                 className={`flex h-12 w-12 items-center justify-center rounded-md border border-black/10 bg-white/85 text-[#B95758] shadow-sm backdrop-blur transition hover:bg-white hover:text-[#9f3f40] ${
                   showInput ? "ring-2 ring-[#B95758]/30" : ""
                 }`}
               >
                 <CirclePlus className="h-6 w-6" strokeWidth={2.4} />
               </button>
+              </>
             )}
+            <ExportButton dados={contacts} />
           </div>
 
           <div className="flex flex-col gap-3">
-            {showInput && (
+            <div
+              aria-hidden={!showInput}
+              inert={!showInput ? "" : undefined}
+              className={`transform-gpu overflow-hidden transition-all duration-300 ease-in-out ${
+                showInput
+                  ? "max-h-[760px] opacity-100 translate-y-0 xl:max-h-[190px]"
+                  : "pointer-events-none max-h-0 translate-y-4 opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden">
               <section className="rounded-md border border-black/10 border-l-4 border-l-[#B95758] bg-white/90 p-4 shadow-sm backdrop-blur">
                 <form
                   className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.2fr_132px_1fr_1fr_1fr_auto] xl:items-end"
@@ -702,7 +709,7 @@ function Contatos() {
                         name="departamento"
                         placeholder="Ex: Planejamento"
                         value={departamento}
-                        onChange={(e) => setDepartmento(e.target.value)}
+                        onChange={(e) => setDepartamento(e.target.value)}
                       />
                     </span>
                   </label>
@@ -726,7 +733,8 @@ function Contatos() {
                   )}
                 </form>
               </section>
-            )}
+              </div>
+            </div>
 
             {loading && (
               <div className="rounded-md bg-white/85 px-5 py-6 text-center text-sm font-semibold text-[#6f625d] shadow-sm">

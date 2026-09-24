@@ -13,7 +13,8 @@ import {
   courseStartsWithPrefix,
   normalizeCourseText,
 } from "../data/courseCollections";
-import { asArray, fetchJson, withCourseIcon } from "../utils/app";
+import { asArray, fetchJson, isActiveCourse, withCourseIcon } from "../utils/app";
+import { AnimatePresence, motion } from "framer-motion";
 
 const PAGE_SIZE = 6;
 const allowedPngTypes = ["image/png", "application/png", "application/octet-stream", ""];
@@ -52,10 +53,13 @@ const Home = () => {
   const canManageCourses = isAdmin === true || String(usuario?.isAdmin).toLowerCase() === "true";
 
   useEffect(() => {
-    fetchJson("/api/cursos")
+    // Admins pedem inativos explicitamente para manter os cards desativados visiveis.
+    const cursosEndpoint = canManageCourses ? "/api/cursos?includeInactive=1" : "/api/cursos";
+
+    fetchJson(cursosEndpoint)
       .then((data) => setCursos(asArray(data).map(withCourseIcon)))
       .catch((err) => console.error("Erro ao carregar cursos:", err));
-  }, []);
+  }, [canManageCourses]);
 
   const resetCourseEdit = () => {
     setEditingCourse(null);
@@ -140,12 +144,19 @@ const Home = () => {
     try {
       setCourseActionError("");
 
-      await deleteCourseRequest(id);
+      const data = await deleteCourseRequest(id);
+
+      if (data.curso) {
+        upsertCourse(data.curso);
+        return;
+      }
 
       const cursoId = String(id);
-      // Remove o curso da tela somente depois que o backend confirma o DELETE.
+      // O DELETE desativa o curso; admins continuam vendo o card inativo.
       setCursos((prev) =>
-        prev.filter((curso) => String(curso.id) !== cursoId),
+        prev.map((curso) =>
+          String(curso.id) === cursoId ? { ...curso, ativo: 0 } : curso,
+        ),
       );
     } catch (error) {
       console.error("Erro ao deletar curso:", error);
@@ -153,9 +164,11 @@ const Home = () => {
     }
   }
   const cards = useMemo(() => {
+    // Usuarios comuns nao veem cursos inativos na home.
+    const cursosVisiveis = canManageCourses ? cursos : cursos.filter(isActiveCourse);
 
     const collectionCards = COURSE_COLLECTIONS.map((collection) => {
-      const cursosColecao = cursos.filter((curso) =>
+      const cursosColecao = cursosVisiveis.filter((curso) =>
         courseStartsWithPrefix(curso, collection.prefix),
       );
 
@@ -173,7 +186,7 @@ const Home = () => {
       };
     });
 
-    const cursosSemColecao = cursos.filter(
+    const cursosSemColecao = cursosVisiveis.filter(
       (curso) =>
         !COURSE_COLLECTIONS.some((collection) =>
           courseStartsWithPrefix(curso, collection.prefix),
@@ -184,16 +197,16 @@ const Home = () => {
       ...collectionCards,
       ...cursosSemColecao.map((curso) => ({ ...curso, type: "course" })),
     ];
-  }, [cursos]);
+  }, [canManageCourses, cursos]);
 
   const cursosFiltrados = useMemo(() => {
     const q = normalizeCourseText(search.trim());
     return q
       ? cards.filter((curso) =>
-          normalizeCourseText(curso.searchText || curso.titulo || "").includes(
-            q,
-          ),
-        )
+        normalizeCourseText(curso.searchText || curso.titulo || "").includes(
+          q,
+        ),
+      )
       : cards;
   }, [cards, search]);
 
@@ -235,69 +248,76 @@ const Home = () => {
       >
         <div className="flex h-full w-full max-w-[1150px] flex-col px-4 sm:px-6 lg:px-8">
           <Outlet />
-
-          {canManageCourses && editingCourse && (
-            <section className="mb-4 w-full rounded-md border border-black/10 border-l-4 border-l-[#B95758] bg-white/95 p-4 shadow-sm backdrop-blur">
-              <form
-                className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)_auto_auto] lg:items-end"
-                onSubmit={handleCourseEditSubmit}
+          <AnimatePresence>
+            {canManageCourses && editingCourse && (
+              <motion.section
+                initial={{ opacity: 0, height: 0, translateY: -10 }}
+                animate={{ opacity: 1, height: "auto", translateY: 0 }}
+                exit={{ opacity: 0, height: 0, translateY: -10 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="mb-4 w-full rounded-md border border-black/10 border-l-4 border-l-[#B95758] bg-white/95 p-4 shadow-sm backdrop-blur transform-gpu overflow-hidden"
               >
-                <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000]">
-                  Nome
-                  <span className="rounded-md border border-black/10 bg-white shadow-sm">
-                    <Input
-                      name="nome"
-                      placeholder="Nome do curso"
-                      value={editCourseTitle}
+                <form
+                  className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)_auto_auto] lg:items-end"
+                  onSubmit={handleCourseEditSubmit}
+                >
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000]">
+                    Nome
+                    <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                      <Input
+                        name="nome"
+                        placeholder="Nome do curso"
+                        value={editCourseTitle}
+                        onChange={(event) => {
+                          setEditCourseTitle(event.target.value);
+                          setEditCourseError("");
+                        }}
+                      />
+                    </span>
+                  </label>
+
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700">
+                    Icone PNG
+                    <input
+                      ref={editCourseFileInputRef}
+                      type="file"
+                      accept="image/png,.png"
                       onChange={(event) => {
-                        setEditCourseTitle(event.target.value);
+                        setEditCourseIconFile(event.target.files?.[0] || null);
                         setEditCourseError("");
+                        setEditCourseSuccess("");
                       }}
+                      className="min-h-10 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
                     />
-                  </span>
-                </label>
+                  </label>
 
-                <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700">
-                  Icone PNG
-                  <input
-                    ref={editCourseFileInputRef}
-                    type="file"
-                    accept="image/png,.png"
-                    onChange={(event) => {
-                      setEditCourseIconFile(event.target.files?.[0] || null);
-                      setEditCourseError("");
-                      setEditCourseSuccess("");
-                    }}
-                    className="min-h-10 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
-                  />
-                </label>
+                  <button
+                    type="submit"
+                    disabled={updatingCourse}
+                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-[#B95758] px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#9f3f40] disabled:cursor-not-allowed disabled:opacity-70 lg:w-auto"
+                  >
+                    <Upload className="h-4 w-4" aria-hidden="true" />
+                    {updatingCourse ? "Atualizando..." : "Atualizar"}
+                  </button>
 
-                <button
-                  type="submit"
-                  disabled={updatingCourse}
-                  className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-[#B95758] px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#9f3f40] disabled:cursor-not-allowed disabled:opacity-70 lg:w-auto"
-                >
-                  <Upload className="h-4 w-4" aria-hidden="true" />
-                  {updatingCourse ? "Atualizando..." : "Atualizar"}
-                </button>
+                  <button
+                    type="button"
+                    onClick={resetCourseEdit}
+                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-4 py-2 text-sm font-bold text-[#6f625d] shadow-sm transition hover:bg-[#F0F0E9] lg:w-auto"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                    Cancelar
+                  </button>
+                </form>
 
-                <button
-                  type="button"
-                  onClick={resetCourseEdit}
-                  className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-4 py-2 text-sm font-bold text-[#6f625d] shadow-sm transition hover:bg-[#F0F0E9] lg:w-auto"
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                  Cancelar
-                </button>
-              </form>
-
-              {editCourseError && (
-                <p className="mt-3 text-sm font-semibold text-[#B95758]">
-                  {editCourseError}
-                </p>
-              )}
-            </section>
-          )}
+                {editCourseError && (
+                  <p className="mt-3 text-sm font-semibold text-[#B95758]">
+                    {editCourseError}
+                  </p>
+                )}
+              </motion.section>
+            )}
+          </AnimatePresence>
 
           {!editingCourse && editCourseSuccess && (
             <p className="mb-4 text-center text-sm font-semibold text-green-700">
@@ -328,13 +348,9 @@ const Home = () => {
                     <CarouselCard
                       id={curso.id}
                       title={curso.titulo}
+                      ativo={curso.ativo}
                       icon_url={curso.icon_url}
                       onClick={() => openCurso(curso)}
-                      className={
-                        curso.type === "collection"
-                          ? "bg-[linear-gradient(135deg,_#263238,_#e14d3a)]"
-                          : ""
-                      }
                     />
 
                     {canManageCourses && curso.type === "course" && (
@@ -409,11 +425,10 @@ const Home = () => {
                     key={i}
                     onClick={() => setPage(i)}
                     aria-label={`Ir para pagina ${i + 1}`}
-                    className={`flex h-10 w-10 items-center justify-center rounded-md text-center font-medium ${
-                      page === i
-                        ? "bg-yellow-500 text-white shadow-md"
-                        : "bg-white text-gray-600 hover:bg-gray-200"
-                    }`}
+                    className={`flex h-10 w-10 items-center justify-center rounded-md text-center font-medium ${page === i
+                      ? "bg-yellow-500 text-white shadow-md"
+                      : "bg-white text-gray-600 hover:bg-gray-200"
+                      }`}
                   >
                     {i + 1}
                   </button>

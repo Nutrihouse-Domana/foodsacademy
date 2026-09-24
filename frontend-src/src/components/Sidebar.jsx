@@ -721,7 +721,7 @@ const Sidebar = ({
         style={{ width: sidebarWidth }}
         className="sidebar fixed left-0 top-0 hidden h-full select-none flex-col justify-between bg-[linear-gradient(135deg,_#B95758,_#e14d3a)] p-6 text-white shadow-lg md:flex"
       >
-        <div className="mb-6 space-y-4">
+        <div className="mb-6">
           <div className="flex items-center gap-3">
             <div className="group relative">
               <button
@@ -756,7 +756,16 @@ const Sidebar = ({
             )}
           </div>
 
-          {showInput && (
+          <div
+            aria-hidden={!showInput}
+            inert={!showInput ? "" : undefined}
+            className={`transform-gpu overflow-hidden transition-all duration-1000 ease-in-out ${
+              showInput
+                ? "mt-4 max-h-[260px] opacity-100 translate-y-0"
+                : "pointer-events-none mt-0 max-h-0 translate-y-4 opacity-0"
+            }`}
+          >
+            <div className="overflow-hidden">
             <section className="rounded-md border border-white/25 bg-white/95 p-3 text-[#332f2d] shadow-sm">
               <form className="space-y-3" onSubmit={onSubmit}>
                 <label className="block text-sm font-semibold text-[#6d625e]">
@@ -786,7 +795,8 @@ const Sidebar = ({
                 </button>
               </form>
             </section>
-          )}
+            </div>
+          </div>
         </div>
 
         <ActionError />

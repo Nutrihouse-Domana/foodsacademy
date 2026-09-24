@@ -143,7 +143,10 @@ const removeIconFile = async (fileName) => {
 router.get(
   '/cursos',
   asyncRoute('Erro ao buscar cursos', async (req, res) => {
-    const cursos = await query(`SELECT ${cursoFields} FROM cursos WHERE ISNULL(ativo, 1) = 1`);
+    // Somente admins autenticados podem pedir cursos inativos na listagem.
+    const includeInactive = req.query?.includeInactive === '1' && req.authUser?.isAdmin;
+    const whereAtivos = includeInactive ? '' : ' WHERE ISNULL(ativo, 1) = 1';
+    const cursos = await query(`SELECT ${cursoFields} FROM cursos${whereAtivos}`);
     res.json(cursos.map(withIcon));
   })
 );
@@ -171,7 +174,7 @@ router.get(
 router.delete(
   '/cursos/:id',
   requireAdmin,
-  asyncRoute('Erro ao desativar curso', async (req, res) => {
+  asyncRoute('Erro ao alternar status do curso', async (req, res) => {
     const idCurso = Number(req.params.id);
 
     if (!Number.isInteger(idCurso) || idCurso <= 0) {
@@ -181,15 +184,16 @@ router.delete(
     const params = { id: [sql.Int, idCurso] };
     const [curso] = await query(
       `UPDATE cursos
-       SET ativo = 0
+       SET ativo = CASE WHEN ISNULL(ativo, 1) = 1 THEN 0 ELSE 1 END
        OUTPUT INSERTED.id, INSERTED.titulo, INSERTED.caminho, INSERTED.icon, INSERTED.caminho_icon, INSERTED.ativo
        WHERE id = @id`,
       params
     );
 
     if (!curso) return res.status(404).json({ error: 'Curso nao encontrado.' });
+
     res.json({
-      message: 'Curso desativado com sucesso.',
+      message: curso.ativo ? 'Curso ativado com sucesso.' : 'Curso desativado com sucesso.',
       curso: withIcon(curso),
     });
   })
