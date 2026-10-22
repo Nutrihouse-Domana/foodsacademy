@@ -1,0 +1,52 @@
+.dark-mode-button {
+  /* Dimensoes fixas evitam deslocamentos ao alternar entre sol e lua. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background-color: transparent;
+  color: #4b5563;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.dark-mode-button:hover {
+  background-color: #f3f4f6;
+  color: #a16207;
+}
+
+.dark-mode-button:focus-visible {
+  outline: 2px solid #eab308;
+  outline-offset: 2px;
+}
+
+/* O estado pressionado muda o icone sem aplicar um fundo preto. */
+.dark-mode-button[aria-pressed="true"] {
+  color: #a16207;
+}
+
+body.dark .dark-mode-button {
+  color: #facc15;
+}
+
+body.dark .dark-mode-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Na Sidebar, o icone claro contrasta com o fundo da marca. */
+.sidebar .dark-mode-button {
+  color: #ffffff;
+}
+
+.sidebar .dark-mode-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark .sidebar .dark-mode-button {
+  color: #facc15;
+}

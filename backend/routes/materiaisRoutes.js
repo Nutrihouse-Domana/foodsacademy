@@ -12,11 +12,13 @@ const publicRootDir = path.join(__dirname, '..', '..');
 const frontendPublicDir = path.join(publicRootDir, 'frontend');
 const frontendSrcPublicDir = path.join(publicRootDir, 'frontend-src', 'public');
 const videosCursosDir = path.join(publicRootDir, 'videos_cursos');
-const MAX_MP4_SIZE = 1048576;
+// Usa o mesmo limite para validar o PDF e informar o tamanho permitido.
+const MAX_PDF_SIZE_MB = 25;
+const MAX_PDF_SIZE = MAX_PDF_SIZE_MB * 1024 * 1024;
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_MP4_SIZE },
+  limits: { fileSize: MAX_PDF_SIZE },
 });
 
 const requireAdmin = (req, res, next) => {
@@ -31,7 +33,7 @@ const uploadPdf = (req, res, next) => {
 
     const message =
       error.code === 'LIMIT_FILE_SIZE'
-        ? 'PDF maior que o limite de 25MB.'
+        ? `PDF maior que o limite de ${MAX_PDF_SIZE_MB}MB.`
         : 'Erro ao enviar PDF.';
 
     return res.status(400).json({ error: message });

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
+import DarkModeButton from "./DarkModeButton";
 import { useNavigate } from "react-router-dom";
 import OndaTop from "../assets/images/background_onda1.jpg";
 import OndaBottom from "../assets/images/background_onda2.jpg";
@@ -103,6 +104,7 @@ const authError = (message = "") => {
   return "Falha na autenticação";
 };
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const Login = () => {
   const [rememberedUser, setRememberedUser] = useState("");
   const [error, setError] = useState("");
@@ -219,7 +221,10 @@ const Login = () => {
   ];
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FAF9F7] px-4 py-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FAF9F7] dark:bg-zinc-950 px-4 py-8">
+      <div className="absolute right-4 top-4 z-20">
+        <DarkModeButton />
+      </div>
       {[
         [OndaTop, "left-0 top-0"],
         [OndaBottom, "bottom-0 right-0"],
@@ -228,7 +233,7 @@ const Login = () => {
           key={position}
           src={src}
           alt=""
-          className={`pointer-events-none absolute z-0 h-[22%] max-w-[70%] object-contain sm:h-[30%] sm:max-w-[50%] ${position}`}
+          className={`pointer-events-none absolute z-0 h-[22%] max-w-[70%] object-contain sm:h-[30%] sm:max-w-[50%]  dark:hidden${position} dark:hidden`}
         />
       ))}
 
@@ -267,7 +272,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="mx-auto mt-2 w-full max-w-40 rounded-full bg-white py-2 font-bold text-[#0c0b0b] transition-all hover:bg-gray-300 disabled:opacity-80"
+            className="mx-auto mt-2 w-full max-w-40 rounded-full bg-white dark:bg-zinc-800 py-2 font-bold text-[#0c0b0b] dark:text-zinc-100 transition-all hover:bg-gray-300 dark:hover:bg-zinc-700 disabled:opacity-80"
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>

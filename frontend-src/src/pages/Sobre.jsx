@@ -16,18 +16,19 @@ const items = [
   [Clock, "Atualizações frequentes e novos módulos"],
 ];
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const Sobre = () => {
   return (
-    <main className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#FFFFFF]">
+    <main className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#FFFFFF] dark:bg-zinc-950">
       <img
         src={Onda1}
         alt=""
-        className="pointer-events-none absolute right-0 top-0 z-0 w-36 sm:w-48 md:w-56"
+        className="pointer-events-none absolute right-0 top-0 z-0 w-36 sm:w-48 md:w-56 dark:hidden"
       />
       <img
         src={Onda2}
         alt=""
-        className="pointer-events-none absolute left-0 top-0 z-0 h-[28%] max-w-[70%] object-contain sm:h-[40%] sm:max-w-[50%]"
+        className="pointer-events-none absolute left-0 top-0 z-0 h-[28%] max-w-[70%] object-contain sm:h-[40%] sm:max-w-[50%] dark:hidden"
       />
 
       <Header />
@@ -43,22 +44,22 @@ const Sobre = () => {
           </div>
 
           <div className="space-y-5 sm:space-y-6">
-            <div className="rounded-lg bg-white p-5 text-center shadow sm:p-6">
-              <h2 className="mb-3 text-lg font-bold text-[#e14d3a] sm:text-xl">
+            <div className="rounded-lg bg-white dark:bg-zinc-800 p-5 text-center shadow sm:p-6">
+              <h2 className="mb-3 text-lg font-bold text-[#e14d3a] dark:text-rose-400 sm:text-xl">
                 NOSSA MISSÃO
               </h2>
-              <p className="text-sm leading-relaxed text-gray-800 md:text-base">
+              <p className="text-sm leading-relaxed text-gray-800 dark:text-zinc-100 md:text-base">
                 Promover um ambiente de aprendizado moderno, acessível e
                 integrado ao dia a dia da NutriHouse, com foco em qualidade,
                 inovação e desenvolvimento contínuo.
               </p>
             </div>
 
-            <div className="rounded-lg bg-white p-5 text-center shadow sm:p-6">
-              <h2 className="mb-3 text-lg font-bold text-[#e14d3a] sm:text-xl">
+            <div className="rounded-lg bg-white dark:bg-zinc-800 p-5 text-center shadow sm:p-6">
+              <h2 className="mb-3 text-lg font-bold text-[#e14d3a] dark:text-rose-400 sm:text-xl">
                 NOSSA VISÃO
               </h2>
-              <p className="text-sm leading-relaxed text-gray-800 md:text-base">
+              <p className="text-sm leading-relaxed text-gray-800 dark:text-zinc-100 md:text-base">
                 Transformar a NutriHouse em um ambiente de aprendizado contínuo
                 e de excelência, promovendo o crescimento e a capacitação de
                 nossos colaboradores, fortalecendo nossa cultura e garantindo a
@@ -68,15 +69,15 @@ const Sobre = () => {
           </div>
         </section>
 
-        <section className="my-10 rounded-lg bg-white p-5 shadow sm:p-8 md:my-12">
-          <h2 className="mb-8 text-center text-xl font-bold text-[#e14d3a] md:mb-10 md:text-2xl">
+        <section className="my-10 rounded-lg bg-white dark:bg-zinc-800 p-5 shadow sm:p-8 md:my-12">
+          <h2 className="mb-8 text-center text-xl font-bold text-[#e14d3a] dark:text-rose-400 md:mb-10 md:text-2xl">
             O QUE ENCONTRAR NA PLATAFORMA
           </h2>
           <div className="space-y-5 sm:space-y-6">
             {items.map(([icon, text]) => (
               <div key={text} className="flex items-start gap-4">
                 <img src={icon} alt="" className="h-10 w-10 shrink-0" />
-                <p className="text-sm text-gray-700 md:text-base">{text}</p>
+                <p className="text-sm text-gray-700 dark:text-zinc-300 md:text-base">{text}</p>
               </div>
             ))}
           </div>

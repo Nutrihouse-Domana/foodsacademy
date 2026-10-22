@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#FAF9F7" />
+    <title>Sem conexão | Foods Academy</title>
+    <!-- A tela offline e independente de fontes, scripts e imagens da rede. -->
+    <style>
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #FAF9F7; color: #27272a; font-family: system-ui, sans-serif; }
+      main { max-width: 28rem; padding: 2rem; text-align: center; }
+      p { line-height: 1.6; }
+      button { border: 0; border-radius: .5rem; padding: .85rem 1.25rem; background: #b91c1c; color: white; font: inherit; cursor: pointer; }
+      button:focus-visible { outline: 3px solid #27272a; outline-offset: 4px; }
+      @media (prefers-color-scheme: dark) { body { background: #09090b; color: #fafafa; } button:focus-visible { outline-color: #fafafa; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>Foods Academy</p>
+      <h1>Não foi possível conectar</h1>
+      <p>Verifique sua conexão e tente novamente. O acesso aos cursos e à sua conta precisa de conexão com o servidor.</p>
+      <!-- Reabre a rota solicitada para retomar o fluxo normal de autenticacao. -->
+      <button type="button" onclick="window.location.reload()">Tentar novamente</button>
+    </main>
+  </body>
+</html>

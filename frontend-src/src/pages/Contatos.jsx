@@ -530,14 +530,14 @@ function Contatos() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-[#FFFFFF] pt-[128px] font-sans sm:pt-[132px] lg:pt-[72px]">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-[#FFFFFF] dark:bg-zinc-950 pt-[128px] font-sans sm:pt-[132px] lg:pt-[72px]">
       <Header />
 
-      <section className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-6 text-[#2f2926] sm:px-6 sm:py-8 lg:px-8">
+      <section className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-6 text-[#2f2926] dark:text-zinc-100 sm:px-6 sm:py-8 lg:px-8">
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 sm:hidden"
+          className="pointer-events-none absolute inset-x-0 bottom-0 sm:hidden dark:hidden"
           style={{
             backgroundImage: `url(${backgroundImage})`,
             backgroundPosition: "bottom",
@@ -549,7 +549,7 @@ function Contatos() {
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[55%] bg-bottom bg-no-repeat sm:block"
+          className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[55%] bg-bottom bg-no-repeat sm:block dark:hidden"
           style={{
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: "100% 40%",
@@ -578,25 +578,25 @@ function Contatos() {
                 strokeWidth={3}
               />
             </button>
-            <label className="flex h-12 min-w-0 items-center gap-3 rounded-md border border-black/10 bg-white/80 px-4 shadow-sm backdrop-blur">
-              <Icon name="search" className="h-5 w-5 shrink-0 text-[#6f625d]" />
+            <label className="flex h-12 min-w-0 items-center gap-3 rounded-md border border-black/10 dark:border-white/15 bg-white/80 dark:bg-zinc-800/80 px-4 shadow-sm backdrop-blur">
+              <Icon name="search" className="h-5 w-5 shrink-0 text-[#6f625d] dark:text-zinc-400" />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar por nome, numero ou setor"
-                className="w-full bg-transparent text-sm font-semibold text-[#2f2926] outline-none placeholder:text-[#9b928d]"
+                className="w-full bg-transparent text-sm font-semibold text-[#2f2926] dark:text-zinc-100 outline-none placeholder:text-[#9b928d] dark:placeholder:text-zinc-400"
               />
             </label>
 
-            <label className="flex h-12 min-w-0 items-center gap-3 rounded-md border border-black/10 bg-white/80 px-4 shadow-sm backdrop-blur">
+            <label className="flex h-12 min-w-0 items-center gap-3 rounded-md border border-black/10 dark:border-white/15 bg-white/80 dark:bg-zinc-800/80 px-4 shadow-sm backdrop-blur">
               <Icon
                 name="sliders"
-                className="h-5 w-5 shrink-0 text-[#6f625d]"
+                className="h-5 w-5 shrink-0 text-[#6f625d] dark:text-zinc-400"
               />
               <select
                 value={department}
                 onChange={(event) => setDepartment(event.target.value)}
-                className="w-full bg-transparent text-sm font-bold text-[#2f2926] outline-none"
+                className="w-full bg-transparent text-sm font-bold text-[#2f2926] dark:text-zinc-100 outline-none"
               >
                 <option value="todos">Todos os setores</option>
                 <option value={FAVORITES_FILTER} style={{ fontWeight: "bold" }}>
@@ -616,7 +616,7 @@ function Contatos() {
                 onClick={showInputs}
                 aria-label="Adicionar contato"
                 title="Novo contato"
-                className={`flex h-12 w-12 items-center justify-center rounded-md border border-black/10 bg-white/85 text-[#B95758] shadow-sm backdrop-blur transition hover:bg-white hover:text-[#9f3f40] ${
+                className={`flex h-12 w-12 items-center justify-center rounded-md border border-black/10 dark:border-white/15 bg-white/85 dark:bg-zinc-800/85 text-[#B95758] dark:text-rose-300 shadow-sm backdrop-blur transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#9f3f40] dark:hover:text-rose-300 ${
                   showInput ? "ring-2 ring-[#B95758]/30" : ""
                 }`}
               >
@@ -638,14 +638,14 @@ function Contatos() {
               }`}
             >
               <div className="overflow-hidden">
-              <section className="rounded-md border border-black/10 border-l-4 border-l-[#B95758] bg-white/90 p-4 shadow-sm backdrop-blur">
+              <section className="rounded-md border border-black/10 dark:border-white/15 border-l-4 border-l-[#B95758] bg-white/90 dark:bg-zinc-800/90 p-4 shadow-sm backdrop-blur">
                 <form
                   className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.2fr_132px_1fr_1fr_1fr_auto] xl:items-end"
                   onSubmit={onSubmit}
                 >
-                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#928884]">
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#928884] dark:text-zinc-400">
                     Nome
-                    <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                    <span className="rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
                       <Input
                         name="nome"
                         placeholder="Nome do contato"
@@ -655,10 +655,10 @@ function Contatos() {
                     </span>
                   </label>
 
-                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936]">
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936] dark:text-zinc-100">
                     DDD
-                    <span className="flex rounded-md border border-black/10 bg-white shadow-sm">
-                      <span className="flex min-h-11 items-center border-r border-black/10 px-3 text-sm font-bold text-[#B95758]">
+                    <span className="flex rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
+                      <span className="flex min-h-11 items-center border-r border-black/10 dark:border-white/15 px-3 text-sm font-bold text-[#B95758] dark:text-rose-300">
                         +55
                       </span>
                       <Input
@@ -674,9 +674,9 @@ function Contatos() {
                     </span>
                   </label>
 
-                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936]">
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936] dark:text-zinc-100">
                     Numero
-                    <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                    <span className="rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
                       <Input
                         name="numero"
                         placeholder="99999-9999"
@@ -690,9 +690,9 @@ function Contatos() {
                     </span>
                   </label>
 
-                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936]">
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936] dark:text-zinc-100">
                     Tipo
-                    <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                    <span className="rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
                       <Input
                         name="tipo"
                         placeholder="Ex: Administrativo"
@@ -702,9 +702,9 @@ function Contatos() {
                     </span>
                   </label>
 
-                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936]">
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#403936] dark:text-zinc-100">
                     Departamento
-                    <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                    <span className="rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
                       <Input
                         name="departamento"
                         placeholder="Ex: Planejamento"
@@ -737,19 +737,19 @@ function Contatos() {
             </div>
 
             {loading && (
-              <div className="rounded-md bg-white/85 px-5 py-6 text-center text-sm font-semibold text-[#6f625d] shadow-sm">
+              <div className="rounded-md bg-white/85 dark:bg-zinc-800/85 px-5 py-6 text-center text-sm font-semibold text-[#6f625d] dark:text-zinc-400 shadow-sm">
                 Carregando contatos...
               </div>
             )}
 
             {!loading && error && (
-              <div className="rounded-md bg-white/85 px-5 py-6 text-center text-sm font-semibold text-[#9f3f40] shadow-sm">
+              <div className="rounded-md bg-white/85 dark:bg-zinc-800/85 px-5 py-6 text-center text-sm font-semibold text-[#9f3f40] dark:text-rose-300 shadow-sm">
                 {error}
               </div>
             )}
 
             {!loading && !error && visibleContacts.length === 0 && (
-              <div className="rounded-md bg-white/85 px-5 py-6 text-center text-sm font-semibold text-[#6f625d] shadow-sm">
+              <div className="rounded-md bg-white/85 dark:bg-zinc-800/85 px-5 py-6 text-center text-sm font-semibold text-[#6f625d] dark:text-zinc-400 shadow-sm">
                 Nenhum contato encontrado.
               </div>
             )}
@@ -759,27 +759,27 @@ function Contatos() {
               visibleContacts.map((contact) => (
                 <article
                   key={contact.id}
-                  className="grid min-h-[96px] items-center gap-4 rounded-md bg-[#F0F0E9]/95  border-black/5 px-4 py-4 shadow-sm backdrop-blur sm:grid-cols-[64px_1fr_auto] sm:px-5"
+                  className="grid min-h-[96px] items-center gap-4 rounded-md bg-[#F0F0E9]/95 dark:bg-zinc-800/95  border-black/5 dark:border-white/10 px-4 py-4 shadow-sm backdrop-blur sm:grid-cols-[64px_1fr_auto] sm:px-5"
                 >
                   <div className="flex h-14 w-14 items-center justify-center rounded-md bg-[#B95758] text-base font-bold text-white shadow-sm">
                     {getInitials(contact.nome)}
                   </div>
 
                   <div className="min-w-0">
-                    <h2 className="truncate text-base font-medium text-[#403936]">
+                    <h2 className="truncate text-base font-medium text-[#403936] dark:text-zinc-100">
                       {contact.nome}
                     </h2>
-                    <p className="mt-1 truncate text-sm text-[#6f625d]">
+                    <p className="mt-1 truncate text-sm text-[#6f625d] dark:text-zinc-400">
                       {contact.tipo}
                     </p>
                   </div>
 
                   <div className="flex min-w-0 flex-wrap items-center gap-3 sm:justify-end">
-                    <span className="rounded-full bg-[#f0e7dc] px-3 py-2 text-xs font-bold text-[#8c5b21]">
+                    <span className="rounded-full bg-[#f0e7dc] dark:bg-amber-950/60 px-3 py-2 text-xs font-bold text-[#8c5b21] dark:text-amber-300">
                       {contact.departamento}
                     </span>
 
-                    <strong className="min-w-[150px] text-sm text-[#2f2926]">
+                    <strong className="min-w-[150px] text-sm text-[#2f2926] dark:text-zinc-100">
                       {contact.telefone}
                     </strong>
 
@@ -788,8 +788,8 @@ function Contatos() {
                       onClick={() => toggleFavorito(contact.id)}
                       className={`flex h-11 w-11 items-center justify-center rounded-full transition ${
                         favoritos.includes(String(contact.id))
-                          ? "bg-[#F0F0E9] text-white hover:bg-[#da3033] hover:text-white"
-                          : "text-[#B95758] hover:bg-[#da3033] hover:text-white"
+                          ? "bg-[#F0F0E9] dark:bg-zinc-800 text-white hover:bg-[#da3033] hover:text-white"
+                          : "text-[#B95758] dark:text-rose-300 hover:bg-[#da3033] hover:text-white"
                       }`}
                       aria-label={
                         favoritos.includes(String(contact.id))
@@ -817,7 +817,7 @@ function Contatos() {
                       href={getWhatsappLink(contact.telefone)}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex h-11 w-11 items-center justify-center rounded-full text-[#074417] transition hover:bg-[#da3033] hover:text-white"
+                      className="flex h-11 w-11 items-center justify-center rounded-full text-[#074417] dark:text-green-400 transition hover:bg-[#da3033] hover:text-white"
                       aria-label={`Abrir WhatsApp de ${contact.nome}`}
                     >
                       <Icon name="messageCircle" className="h-6 w-6" />
@@ -826,7 +826,7 @@ function Contatos() {
                     <button
                       type="button"
                       onClick={() => handleCopy(contact)}
-                      className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0F0E9] text-yellow-700 transition hover:bg-[#da3033] hover:text-white"
+                      className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0F0E9] dark:bg-zinc-800 text-yellow-700 dark:text-yellow-400 transition hover:bg-[#da3033] hover:text-white"
                       aria-label={`Copiar telefone de ${contact.nome}`}
                       title={copiedId === contact.id ? "Copiado" : "Copiar"}
                     >
@@ -839,7 +839,7 @@ function Contatos() {
                       <button
                         type="button"
                         onClick={() => deleteContact(contact.id)}
-                        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0F0E9] text-red-500 transition hover:bg-[#da3033] hover:text-white"
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0F0E9] dark:bg-zinc-800 text-red-500 transition hover:bg-[#da3033] hover:text-white"
                         aria-label={`Deletar contato de ${contact.nome}`}
                         title="Deletar"
                       >
@@ -851,7 +851,7 @@ function Contatos() {
                       <button
                         type="button"
                         onClick={() => editContact(contact)}
-                        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0F0E9] text-yellow-700 transition hover:bg-[#da3033] hover:text-white"
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F0F0E9] dark:bg-zinc-800 text-yellow-700 dark:text-yellow-400 transition hover:bg-[#da3033] hover:text-white"
                         aria-label={`Editar contato de ${contact.nome}`}
                         title="Editar"
                       >
@@ -865,7 +865,7 @@ function Contatos() {
 
           {!loading && !error && filteredContacts.length > 0 && (
             <footer className="flex flex-col gap-3 pt-3 text-sm font-bold text-[#ffffff] md:flex-row md:items-center md:justify-between">
-              <span className="text-[#000000] text-sm font-bold">
+              <span className="text-[#000000] dark:text-zinc-100 text-sm font-bold">
                 Mostrando {(currentPage - 1) * PAGE_SIZE + 1}-
                 {Math.min(currentPage * PAGE_SIZE, filteredContacts.length)} de{" "}
                 {filteredContacts.length} contatos
@@ -876,7 +876,7 @@ function Contatos() {
                   type="button"
                   onClick={() => setPage((value) => Math.max(value - 1, 1))}
                   disabled={currentPage === 1}
-                  className="flex h-10 w-10 items-center justify-center rounded-md bg-white/80 text-[#B95758] shadow-sm transition hover:bg-white disabled:opacity-45"
+                  className="flex h-10 w-10 items-center justify-center rounded-md bg-white/80 dark:bg-zinc-800/80 text-[#B95758] dark:text-rose-300 shadow-sm transition hover:bg-white dark:hover:bg-zinc-700 disabled:opacity-45"
                   aria-label="Pagina anterior"
                 >
                   <Icon name="left" className="h-5 w-5" />
@@ -893,7 +893,7 @@ function Contatos() {
                     className={`flex h-10 w-10 items-center justify-center rounded-md font-bold shadow-sm transition ${
                       item === currentPage
                         ? "bg-[#B95758] text-white"
-                        : "bg-white/85 text-[#6f625d] hover:bg-white"
+                        : "bg-white/85 dark:bg-zinc-800/85 text-[#6f625d] dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-700"
                     }`}
                     aria-label={`Ir para pagina ${item}`}
                   >
@@ -907,7 +907,7 @@ function Contatos() {
                     setPage((value) => Math.min(value + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className="flex h-10 w-10 items-center justify-center rounded-md bg-white/80 text-[#B95758] shadow-sm transition hover:bg-white disabled:opacity-45"
+                  className="flex h-10 w-10 items-center justify-center rounded-md bg-white/80 dark:bg-zinc-800/80 text-[#B95758] dark:text-rose-300 shadow-sm transition hover:bg-white dark:hover:bg-zinc-700 disabled:opacity-45"
                   aria-label="Proxima pagina"
                 >
                   <Icon name="right" className="h-5 w-5" />

@@ -4,6 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -21,6 +23,21 @@
     font-family: "Poppins", sans-serif !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* O fundo global e os controles nativos acompanham o tema das telas. */
+  html.dark,
+  html.dark body,
+  html.dark #root {
+    background-color: #09090b;
+    color: #f4f4f5;
+  }
+
+  .dark input:not([type="checkbox"]):not([type="radio"]),
+  .dark select,
+  .dark textarea {
+    background-color: #27272a;
+    color: #f4f4f5;
   }
 
   img,

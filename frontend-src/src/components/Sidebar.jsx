@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Icon from "./Icon";
+import DarkModeButton from "./DarkModeButton";
 import { useUsuario } from "../contexts/UsuarioContext";
 import { CertificateButton } from "./Certificate";
-import { Check, CirclePlus, SquarePen, Upload, X } from "lucide-react";
+import { Check, CirclePlus, SquarePen, Trash2, Upload, X } from "lucide-react";
 import Input from "../components/Input";
 
 const allowedMp4Types = ["video/mp4", "application/mp4", "application/octet-stream", ""];
@@ -15,6 +16,7 @@ const isValidMp4File = (file) => {
   return fileName.endsWith(".mp4") && allowedMp4Types.includes(file.type || "");
 };
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const Sidebar = ({
   showButton = true,
   modulos = [],
@@ -25,6 +27,8 @@ const Sidebar = ({
   onModuloUpdated = () => {},
   onVideoCreated = () => {},
   onVideoUpdated = () => {},
+  // Notifica a pagina para retirar o video do player e do progresso.
+  onVideoDeleted = () => {},
 }) => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -50,6 +54,8 @@ const Sidebar = ({
   const [submitting, setSubmitting] = useState(false);
   const [updatingModuloId, setUpdatingModuloId] = useState(null);
   const [updatingVideoId, setUpdatingVideoId] = useState(null);
+  // Bloqueia cliques repetidos durante a exclusao.
+  const [deletingVideoId, setDeletingVideoId] = useState(null);
   const [uploadingVideoId, setUploadingVideoId] = useState(null);
   const videoFileInputs = useRef({});
   const editVideoFileInputRef = useRef(null);
@@ -221,7 +227,7 @@ const Sidebar = ({
     showButton && (
       <button
         onClick={() => closeAnd(() => navigate(`/materiais/${id || 1}`))}
-        className={`${className} w-full rounded-md bg-white py-2 font-semibold text-[#B95758] shadow-sm transition hover:bg-gray-100`}
+        className={`${className} w-full rounded-md bg-white dark:bg-zinc-800 py-2 font-semibold text-[#B95758] dark:text-rose-300 shadow-sm transition hover:bg-gray-100 dark:hover:bg-zinc-700`}
       >
         Material de Apoio
       </button>
@@ -229,7 +235,7 @@ const Sidebar = ({
 
   const ActionError = () =>
     actionError && (
-      <p className="mb-3 rounded-md bg-white/95 px-3 py-2 text-xs font-semibold text-[#B95758] shadow-sm">
+      <p className="mb-3 rounded-md bg-white/95 dark:bg-zinc-800/95 px-3 py-2 text-xs font-semibold text-[#B95758] dark:text-rose-300 shadow-sm">
         {actionError}
       </p>
     );
@@ -376,6 +382,32 @@ const Sidebar = ({
     }
   };
 
+  // A confirmacao informa que a exclusao tambem remove o MP4 do servidor.
+  const handleVideoDelete = async (video) => {
+    if (!canManageModules || deletingVideoId !== null || updatingVideoId !== null) return;
+    if (!window.confirm(`Excluir o video "${video.titulo || video.descricao}" (ID ${video.id}) e seu arquivo do servidor? Esta acao nao pode ser desfeita.`)) return;
+    setDeletingVideoId(video.id);
+    setActionError("");
+    try {
+      const response = await fetch(`${getLocalApiBase()}/api/videos/${encodeURIComponent(String(video.id))}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setActionError(data.error || "Nao foi possivel excluir o video.");
+        return;
+      }
+      onVideoDeleted(video.id);
+      setVideosLength(Math.max(0, totalVideos - 1));
+    } catch (error) {
+      console.error("Erro ao excluir video:", error);
+      setActionError("Erro ao conectar ao servidor.");
+    } finally {
+      setDeletingVideoId(null);
+    }
+  };
+
   const VideoItem = ({ video }) => {
     const watched = watchedVideos[video.id];
     const isEditingVideo = String(editingVideoId) === String(video.id);
@@ -385,7 +417,7 @@ const Sidebar = ({
       return (
         <li className="rounded-md border border-white/20 bg-white/10 p-2">
           <form className="space-y-2" onSubmit={(event) => handleVideoEditSubmit(event, video)}>
-            <span className="block rounded-md border border-white/20 bg-white shadow-sm">
+            <span className="block rounded-md border border-white/20 bg-white dark:bg-zinc-800 shadow-sm">
               <Input
                 value={editingVideoTitle}
                 onChange={(event) => setEditingVideoTitle(event.target.value)}
@@ -410,7 +442,7 @@ const Sidebar = ({
                 onClick={() => editVideoFileInputRef.current?.click()}
                 title="Trocar MP4"
                 aria-label="Trocar MP4"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white hover:text-[#B95758]"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#B95758] dark:hover:text-rose-300"
               >
                 <Upload className="h-4 w-4" strokeWidth={2.4} />
               </button>
@@ -424,7 +456,7 @@ const Sidebar = ({
                 disabled={isUpdatingVideo}
                 title="Salvar video"
                 aria-label="Salvar video"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white text-[#B95758] transition hover:bg-yellow-100 disabled:cursor-wait disabled:opacity-60"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white dark:bg-zinc-800 text-[#B95758] dark:text-rose-300 transition hover:bg-yellow-100 dark:hover:bg-yellow-900/60 disabled:cursor-wait disabled:opacity-60"
               >
                 <Check className="h-4 w-4" strokeWidth={2.4} />
               </button>
@@ -434,7 +466,7 @@ const Sidebar = ({
                 onClick={cancelVideoEdit}
                 title="Cancelar"
                 aria-label="Cancelar"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white hover:text-[#B95758]"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#B95758] dark:hover:text-rose-300"
               >
                 <X className="h-4 w-4" strokeWidth={2.4} />
               </button>
@@ -465,11 +497,25 @@ const Sidebar = ({
           <button
             type="button"
             onClick={() => startVideoEdit(video)}
+            disabled={deletingVideoId !== null}
             aria-label={`Editar video ${video.titulo || video.descricao}`}
             title="Editar video"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/20 bg-white/10 text-white transition hover:bg-white hover:text-[#B95758]"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/20 bg-white/10 text-white transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#B95758] dark:hover:text-rose-300"
           >
             <SquarePen className="h-3.5 w-3.5" strokeWidth={2.4} />
+          </button>
+        )}
+        {/* A mesma lixeira atende as listas de desktop e celular. */}
+        {canManageModules && (
+          <button
+            type="button"
+            onClick={() => handleVideoDelete(video)}
+            disabled={deletingVideoId !== null || updatingVideoId !== null}
+            aria-label={`Excluir video ${video.titulo || video.descricao}`}
+            title={String(deletingVideoId) === String(video.id) ? "Excluindo..." : `Excluir video (ID ${video.id})`}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/20 bg-white/10 text-white transition hover:bg-red-700 disabled:cursor-wait disabled:opacity-60"
+          >
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={2.4} />
           </button>
         )}
       </li>
@@ -557,7 +603,7 @@ const Sidebar = ({
             <li key={modulo.id}>
               {isEditingModulo ? (
                 <form className="flex items-center gap-2" onSubmit={(event) => handleModuloEditSubmit(event, modulo)}>
-                  <span className="min-w-0 flex-1 rounded-md border border-white/20 bg-white shadow-sm">
+                  <span className="min-w-0 flex-1 rounded-md border border-white/20 bg-white dark:bg-zinc-800 shadow-sm">
                     <Input
                       value={editingModuloName}
                       onChange={(event) => setEditingModuloName(event.target.value)}
@@ -570,7 +616,7 @@ const Sidebar = ({
                     disabled={isUpdatingModulo}
                     aria-label="Salvar modulo"
                     title="Salvar modulo"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white text-[#B95758] transition hover:bg-yellow-100 disabled:cursor-wait disabled:opacity-60"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white dark:bg-zinc-800 text-[#B95758] dark:text-rose-300 transition hover:bg-yellow-100 dark:hover:bg-yellow-900/60 disabled:cursor-wait disabled:opacity-60"
                   >
                     <Check className="h-4 w-4" strokeWidth={2.4} />
                   </button>
@@ -580,7 +626,7 @@ const Sidebar = ({
                     onClick={cancelModuloEdit}
                     aria-label="Cancelar"
                     title="Cancelar"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white hover:text-[#B95758]"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#B95758] dark:hover:text-rose-300"
                   >
                     <X className="h-4 w-4" strokeWidth={2.4} />
                   </button>
@@ -608,7 +654,7 @@ const Sidebar = ({
                         onClick={() => startModuloEdit(modulo)}
                         aria-label={`Editar modulo ${modulo.titulo}`}
                         title="Editar modulo"
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white hover:text-[#B95758]"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#B95758] dark:hover:text-rose-300"
                       >
                         <SquarePen className="h-4 w-4" strokeWidth={2.4} />
                       </button>
@@ -629,7 +675,7 @@ const Sidebar = ({
                         onClick={() => videoFileInputs.current[modulo.id]?.click()}
                         aria-label={`Enviar video para ${modulo.titulo}`}
                         title="Enviar video"
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white hover:text-[#B95758] disabled:cursor-wait disabled:opacity-60"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#B95758] dark:hover:text-rose-300 disabled:cursor-wait disabled:opacity-60"
                       >
                         <Upload className="h-4 w-4" strokeWidth={2.4} />
                       </button>
@@ -719,7 +765,7 @@ const Sidebar = ({
     <>
       <aside
         style={{ width: sidebarWidth }}
-        className="sidebar fixed left-0 top-0 hidden h-full select-none flex-col justify-between bg-[linear-gradient(135deg,_#B95758,_#e14d3a)] p-6 text-white shadow-lg md:flex"
+        className="sidebar fixed left-0 top-0 hidden h-full select-none flex-col justify-between bg-[linear-gradient(135deg,_#B95758,_#e14d3a)] dark:bg-none dark:bg-zinc-900 p-6 text-white shadow-lg md:flex"
       >
         <div className="mb-6">
           <div className="flex items-center gap-3">
@@ -742,14 +788,15 @@ const Sidebar = ({
               </div>
             </div>
 
-            <h2 className="min-w-0 flex-1 text-lg font-bold uppercase tracking-wide">MODULOS</h2>
+            <h2 className="min-w-0 flex-1 truncate text-sm font-bold uppercase tracking-wide">MODULOS</h2>
+            <DarkModeButton />
             {canManageModules && (
               <button
                 type="button"
                 onClick={() => setShowInput((prev) => !prev)}
                 aria-label="Adicionar modulo"
                 title="Adicionar modulo"
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/30 text-white shadow-sm transition hover:bg-white hover:text-[#B95758] ${showInput ? "bg-white text-[#B95758]" : "bg-white/10"}`}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/30 text-white shadow-sm transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#B95758] dark:hover:text-rose-300 ${showInput ? "bg-white dark:bg-zinc-800 text-[#B95758] dark:text-rose-300" : "bg-white/10"}`}
               >
                 <CirclePlus className="h-5 w-5" strokeWidth={2.4} />
               </button>
@@ -766,9 +813,9 @@ const Sidebar = ({
             }`}
           >
             <div className="overflow-hidden">
-            <section className="rounded-md border border-white/25 bg-white/95 p-3 text-[#332f2d] shadow-sm">
+            <section className="rounded-md border border-white/25 bg-white/95 dark:bg-zinc-800/95 p-3 text-[#332f2d] dark:text-zinc-100 shadow-sm">
               <form className="space-y-3" onSubmit={onSubmit}>
-                <label className="block text-sm font-semibold text-[#6d625e]">
+                <label className="block text-sm font-semibold text-[#6d625e] dark:text-zinc-300">
                   Nome
                   <span className="mt-1 block">
                     <Input
@@ -781,7 +828,7 @@ const Sidebar = ({
                 </label>
 
                 {error && (
-                  <p className="text-xs font-semibold text-[#B95758]">
+                  <p className="text-xs font-semibold text-[#B95758] dark:text-rose-300">
                     {error}
                   </p>
                 )}
@@ -811,11 +858,11 @@ const Sidebar = ({
 
         <div
           onMouseDown={() => setIsResizing(true)}
-          className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-white active:bg-white"
+          className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-white dark:hover:bg-zinc-700 active:bg-white"
         />
       </aside>
 
-      <div className="fixed inset-x-0 top-0 z-50 bg-[linear-gradient(135deg,_#B95758,_#e14d3a)] text-white shadow-lg md:hidden">
+      <div className="sidebar fixed inset-x-0 top-0 z-50 bg-[linear-gradient(135deg,_#B95758,_#e14d3a)] dark:bg-none dark:bg-zinc-900 text-white shadow-lg md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <button
             onClick={() => voltar(true)}
@@ -828,6 +875,8 @@ const Sidebar = ({
           <h2 className="min-w-0 flex-1 truncate text-center text-base font-bold uppercase tracking-wide">
             MODULOS
           </h2>
+
+          <DarkModeButton />
 
           <button
             type="button"

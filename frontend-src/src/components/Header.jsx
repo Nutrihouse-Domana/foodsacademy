@@ -6,6 +6,8 @@ import User from "../assets/logos/logo_novo.svg";
 import { useUsuario } from "../contexts/UsuarioContext";
 import Icon from "./Icon";
 import SearchBar from "./Searchbar.jsx";
+import DarkModeButton from "./DarkModeButton";
+import InstallPwaButton from "./InstallPwaButton";
 import { CirclePlus, Upload } from "lucide-react";
 import Input from "./Input";
 
@@ -15,6 +17,7 @@ const navLinks = [
   ["CONTATOS", "/contatos"],
 ];
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -127,7 +130,7 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-black/5 bg-[#FAF9F7]/95 shadow-sm backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-black/5 dark:border-white/10 bg-[#FAF9F7]/95 dark:bg-zinc-900/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-screen-xl flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6 lg:py-2">
         <div className="flex items-center justify-between gap-3">
           <Link
@@ -145,7 +148,7 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
           <button
             type="button"
             onClick={() => setMenuOpen((value) => !value)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-black transition hover:bg-black/5 lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-black dark:text-zinc-100 transition hover:bg-black/5 dark:hover:bg-white/10 lg:hidden"
             aria-label="Abrir menu"
             aria-expanded={menuOpen}
           >
@@ -164,14 +167,14 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
 
         <div
           className={`${menuOpen ? "flex" : "hidden"
-            } flex-col gap-3 border-t border-black/10 pt-3 lg:flex lg:flex-row lg:items-center lg:gap-8 lg:border-t-0 lg:pt-0`}
+            } flex-col gap-3 border-t border-black/10 dark:border-white/15 pt-3 lg:flex lg:flex-row lg:items-center lg:gap-8 lg:border-t-0 lg:pt-0`}
         >
           <nav className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-6">
             {navLinks.map(([label, path]) => (
               <Link
                 key={path}
                 to={path}
-                className={`relative rounded-md px-2 py-2 text-sm font-semibold transition hover:text-yellow-600 lg:px-0 ${isActive(path) ? "text-yellow-600" : "text-black"
+                className={`relative rounded-md px-2 py-2 text-sm font-semibold transition hover:text-yellow-600 dark:hover:text-yellow-400 lg:px-0 ${isActive(path) ? "text-yellow-600 dark:text-yellow-400" : "text-black dark:text-zinc-100"
                   }`}
               >
                 {label}
@@ -183,9 +186,11 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
           </nav>
 
           <div className="relative flex min-w-0 flex-wrap items-center justify-between gap-3 lg:flex-nowrap lg:justify-start">
+            <DarkModeButton />
+
             <button
               type="button"
-              className="group flex min-w-0 items-center gap-2 text-left text-sm font-medium text-black transition hover:text-yellow-700"
+              className="group flex min-w-0 items-center gap-2 text-left text-sm font-medium text-black dark:text-zinc-100 transition hover:text-yellow-700 dark:hover:text-yellow-400"
               onClick={() => setAccountOpen((value) => !value)}
               aria-expanded={accountOpen}
             >
@@ -195,7 +200,7 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
                   {username}
                 </strong>
               </span>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white shadow-sm transition group-hover:border-yellow-500/70 sm:h-9 sm:w-9">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm transition group-hover:border-yellow-500/70 dark:group-hover:border-yellow-400/70 sm:h-9 sm:w-9">
                 <img src={User} alt="" className="h-full w-full object-cover" />
               </span>
             </button>
@@ -212,20 +217,26 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
               </div>
             )}
 
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => setShowInput((value) => !value)}
-                aria-label={showInput ? "Fechar cadastro de curso" : "Adicionar curso"}
-                className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-3 text-sm font-bold shadow-sm backdrop-blur transition hover:bg-white hover:text-[#9f3f40] ${showInput
-                  ? "bg-white text-[#9f3f40] ring-2 ring-[#B95758]/25"
-                  : "bg-[#FAF9F7] text-[#B95758]"
-                  }`}
-              >
-                <CirclePlus className="h-4 w-4" strokeWidth={2.4} aria-hidden="true" />
-                <span className="hidden sm:inline">Novo curso</span>
-              </button>
-            )}
+            {/* Mantem os botoes juntos no mobile, mesmo quando a linha do usuario quebra. */}
+            <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-0 lg:gap-3">
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setShowInput((value) => !value)}
+                  aria-label={showInput ? "Fechar cadastro de curso" : "Adicionar curso"}
+                  className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 dark:border-white/15 px-3 text-sm font-bold shadow-sm backdrop-blur transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#9f3f40] dark:hover:text-rose-300 ${showInput
+                    ? "bg-white dark:bg-zinc-800 text-[#9f3f40] dark:text-rose-300 ring-2 ring-[#B95758]/25"
+                    : "bg-[#FAF9F7] dark:bg-zinc-900 text-[#B95758] dark:text-rose-300"
+                    }`}
+                >
+                  <CirclePlus className="h-4 w-4" strokeWidth={2.4} aria-hidden="true" />
+                  <span className="hidden sm:inline">Novo curso</span>
+                </button>
+              )}
+
+              {/* Disponibiliza o PWA para todos os usuarios, apos Novo curso. */}
+              <InstallPwaButton />
+            </div>
           </div>
         </div>
       </div>
@@ -239,14 +250,14 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
         }`}
       >
         <div className="overflow-hidden">
-          <section className="rounded-lg border border-black/10 border-l-4 border-l-[#B95758] bg-white/95 p-3 shadow-sm backdrop-blur sm:p-4">
+          <section className="rounded-lg border border-black/10 dark:border-white/15 border-l-4 border-l-[#B95758] bg-white/95 dark:bg-zinc-800/95 p-3 shadow-sm backdrop-blur sm:p-4">
             <form
               className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.9fr)_auto] lg:items-end"
               onSubmit={onSubmit}
             >
-              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000]">
+              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000] dark:text-zinc-100">
                 Nome
-                <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                <span className="rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
                   <Input
                     name="nome"
                     placeholder="Ex: TecFood - "
@@ -259,7 +270,7 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
                 </span>
               </label>
 
-              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700">
+              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Ícone (PNG 512x512)
                 <input
                   ref={fileInputRef}
@@ -270,7 +281,7 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
                     setUploadError("");
                     setUploadSuccess("");
                   }}
-                  className="min-h-10 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
+                  className="min-h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] dark:file:bg-zinc-700 file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] dark:file:text-rose-300 focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
                 />
               </label>
 
@@ -286,7 +297,7 @@ const Header = ({ username: usernameProp, search, setSearch, onCourseCreated }) 
 
             {(error || uploadError || uploadSuccess) && (
               <p
-                className={`mt-3 text-sm font-semibold ${uploadSuccess ? "text-green-700" : "text-[#B95758]"
+                className={`mt-3 text-sm font-semibold ${uploadSuccess ? "text-green-700 dark:text-green-400" : "text-[#B95758] dark:text-rose-300"
                   }`}
               >
                 {uploadSuccess || uploadError || error}

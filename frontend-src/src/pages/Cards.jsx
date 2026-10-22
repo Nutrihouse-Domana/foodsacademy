@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 import { useSearchParams } from "react-router-dom";
 import { SquarePen, Upload, X, Trash2 } from "lucide-react";
 import CarouselCard from "../components/CarouselCard";
@@ -62,7 +63,10 @@ const deleteCourseRequest = async (id) => {
   return fetch(`${localApiBase}/api/cursos/${cursoId}`, options);
 };
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const Cards = () => {
+  // Oculta o fundo decorativo claro quando o tema escuro esta ativo.
+  const { theme } = useTheme();
   const [cursos, setCursos] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -182,8 +186,8 @@ const Cards = () => {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white px-4">
-        <h1 className="text-center text-xl font-semibold text-gray-700 sm:text-2xl">
+      <main className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950 px-4">
+        <h1 className="text-center text-xl font-semibold text-gray-700 dark:text-zinc-300 sm:text-2xl">
           Carregando cursos...
         </h1>
       </main>
@@ -229,21 +233,21 @@ const Cards = () => {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center overflow-x-hidden bg-[#FFFFFF] pt-[128px] font-sans sm:pt-[132px] lg:pt-[72px]">
+    <main className="flex min-h-screen flex-col items-center overflow-x-hidden bg-[#FFFFFF] dark:bg-zinc-950 pt-[128px] font-sans sm:pt-[132px] lg:pt-[72px]">
       <Header search={search} setSearch={setSearch} onCourseCreated={upsertCourse} />
 
       <section
         className="relative flex w-full flex-1 flex-col items-center px-4 py-8 sm:px-6 lg:px-8"
 
         style={{
-          backgroundImage: `url(${backgroundImage})`,
+          backgroundImage: theme === "dark" ? "none" : `url(${backgroundImage})`,
           backgroundPosition: "bottom",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100% 35%",
-          backgroundColor: "white"
+          backgroundColor: "inherit"
         }}
       >
-        <h1 className="text-center text-2xl font-semibold text-gray-800">
+        <h1 className="text-center text-2xl font-semibold text-gray-800 dark:text-zinc-100">
           {activeCollection ? activeCollection.title : "Todos os Cursos"}
         </h1>
 
@@ -258,14 +262,14 @@ const Cards = () => {
             }`}
           >
             <div className="overflow-hidden">
-          <section className="mt-5 w-full max-w-screen-xl rounded-md border border-black/10 border-l-4 border-l-[#B95758] bg-white/95 p-4 shadow-sm backdrop-blur">
+          <section className="mt-5 w-full max-w-screen-xl rounded-md border border-black/10 dark:border-white/15 border-l-4 border-l-[#B95758] bg-white/95 dark:bg-zinc-800/95 p-4 shadow-sm backdrop-blur">
             <form
               className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)_auto_auto] lg:items-end"
               onSubmit={handleCourseEditSubmit}
             >
-              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000]">
+              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000] dark:text-zinc-100">
                 Nome
-                <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                <span className="rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
                   <Input
                     name="nome"
                     placeholder="Nome do curso"
@@ -278,7 +282,7 @@ const Cards = () => {
                 </span>
               </label>
 
-              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700">
+              <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Icone PNG
                 <input
                   ref={editCourseFileInputRef}
@@ -289,7 +293,7 @@ const Cards = () => {
                     setEditCourseError("");
                     setEditCourseSuccess("");
                   }}
-                  className="min-h-10 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
+                  className="min-h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] dark:file:bg-zinc-700 file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] dark:file:text-rose-300 focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
                 />
               </label>
 
@@ -305,7 +309,7 @@ const Cards = () => {
               <button
                 type="button"
                 onClick={resetCourseEdit}
-                className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-4 py-2 text-sm font-bold text-[#6f625d] shadow-sm transition hover:bg-[#F0F0E9] lg:w-auto"
+                className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-bold text-[#6f625d] dark:text-zinc-400 shadow-sm transition hover:bg-[#F0F0E9] dark:hover:bg-zinc-700 lg:w-auto"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
                 Cancelar
@@ -314,7 +318,7 @@ const Cards = () => {
 
             {(editCourseError || editCourseSuccess) && (
               <p
-                className={`mt-3 text-sm font-semibold ${editCourseSuccess ? "text-green-700" : "text-[#B95758]"}`}
+                className={`mt-3 text-sm font-semibold ${editCourseSuccess ? "text-green-700 dark:text-green-400" : "text-[#B95758] dark:text-rose-300"}`}
               >
                 {editCourseSuccess || editCourseError}
               </p>
@@ -325,13 +329,13 @@ const Cards = () => {
         )}
 
         {!editingCourse && editCourseSuccess && (
-          <p className="mt-4 text-sm font-semibold text-green-700">
+          <p className="mt-4 text-sm font-semibold text-green-700 dark:text-green-400">
             {editCourseSuccess}
           </p>
         )}
 
         {error && (
-          <p className="mt-4 text-sm font-semibold text-[#B95758]">
+          <p className="mt-4 text-sm font-semibold text-[#B95758] dark:text-rose-300">
             {error}
           </p>
         )}
@@ -347,7 +351,7 @@ const Cards = () => {
                   onClick={() => startCourseEdit(curso)}
                   aria-label={`Editar curso ${curso.titulo}`}
                   title="Editar curso"
-                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-[#B95758] shadow-sm transition hover:bg-[#F0F0E9] hover:text-[#9f3f40]"
+                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 dark:bg-zinc-800/95 text-[#B95758] dark:text-rose-300 shadow-sm transition hover:bg-[#F0F0E9] dark:hover:bg-zinc-700 hover:text-[#9f3f40] dark:hover:text-rose-300"
                 >
                   <SquarePen className="h-4 w-4" strokeWidth={2.4} />
                 </button>
@@ -358,7 +362,7 @@ const Cards = () => {
                 <button
                   type="button"
                   onClick={() => deletarCurso(curso.id)}
-                  className="absolute top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white"
+                  className="absolute top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 dark:bg-zinc-800/95 text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white"
                   style={{ right: "3.75rem" }}
                   aria-label={`Deletar curso ${curso.titulo}`}
                   title="Deletar curso"
@@ -373,7 +377,7 @@ const Cards = () => {
           ))}
 
           {!cursosFiltrados.length && (
-            <p className="mt-6 w-full text-center text-gray-500">
+            <p className="mt-6 w-full text-center text-gray-500 dark:text-zinc-400">
               {search
                 ? `Nenhum curso encontrado para "${search}".`
                 : activeCollection
@@ -383,7 +387,7 @@ const Cards = () => {
           )}
         </div>
 
-        <div className="mt-2 text-center text-sm text-gray-500">
+        <div className="mt-2 text-center text-sm text-gray-500 dark:text-zinc-400">
           Mostrando {cursosFiltrados.length} de {cursosBase.length}
         </div>
       </section>

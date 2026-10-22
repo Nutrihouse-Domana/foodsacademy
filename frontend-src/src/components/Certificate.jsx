@@ -342,6 +342,7 @@ const downloadBlob = (blob, fileName) => {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 export function CertificateButton({
   studentName,
   courseName,
@@ -379,7 +380,7 @@ export function CertificateButton({
         type="button"
         onClick={handleDownload}
         disabled={isGenerating}
-        className="w-full rounded-md bg-white py-2 text-center font-semibold text-[#B95758] shadow-sm transition hover:bg-gray-100 disabled:cursor-wait disabled:opacity-80"
+        className="w-full rounded-md bg-white dark:bg-zinc-800 py-2 text-center font-semibold text-[#B95758] dark:text-rose-300 shadow-sm transition hover:bg-gray-100 dark:hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-80"
       >
         {isGenerating ? "Gerando certificado..." : "Baixar certificado"}
       </button>

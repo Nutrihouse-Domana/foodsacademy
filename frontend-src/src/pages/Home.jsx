@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 import { Outlet, useNavigate } from "react-router-dom";
 import { SquarePen, Upload, X, Trash2 } from "lucide-react";
 import backgroundImage from "../assets/background_teknisa_page.png";
@@ -36,7 +37,10 @@ const deleteCourseRequest = (idCurso) =>
   fetchJson(`/api/cursos/${encodeURIComponent(String(idCurso))}`, {
     method: "DELETE",
   });
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const Home = () => {
+  // Oculta o fundo decorativo claro quando o tema escuro esta ativo.
+  const { theme } = useTheme();
   const [page, setPage] = useState(0);
   const [cursos, setCursos] = useState([]);
   const [search, setSearch] = useState("");
@@ -234,13 +238,13 @@ const Home = () => {
     );
 
   return (
-    <main className="flex min-h-screen flex-col overflow-x-hidden bg-[#FFFFFF] pt-[128px] font-sans sm:pt-[132px] lg:pt-[72px]">
+    <main className="flex min-h-screen flex-col overflow-x-hidden bg-[#FFFFFF] dark:bg-zinc-950 pt-[128px] font-sans sm:pt-[132px] lg:pt-[72px]">
       <Header search={search} setSearch={setSearch} onCourseCreated={upsertCourse} />
 
       <section
         className="relative flex flex-1 flex-col items-center justify-center py-6 sm:py-8"
         style={{
-          backgroundImage: `url(${backgroundImage})`,
+          backgroundImage: theme === "dark" ? "none" : `url(${backgroundImage})`,
           backgroundPosition: "bottom",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100% 35%",
@@ -255,15 +259,15 @@ const Home = () => {
                 animate={{ opacity: 1, height: "auto", translateY: 0 }}
                 exit={{ opacity: 0, height: 0, translateY: -10 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="mb-4 w-full rounded-md border border-black/10 border-l-4 border-l-[#B95758] bg-white/95 p-4 shadow-sm backdrop-blur transform-gpu overflow-hidden"
+                className="mb-4 w-full rounded-md border border-black/10 dark:border-white/15 border-l-4 border-l-[#B95758] bg-white/95 dark:bg-zinc-800/95 p-4 shadow-sm backdrop-blur transform-gpu overflow-hidden"
               >
                 <form
                   className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)_auto_auto] lg:items-end"
                   onSubmit={handleCourseEditSubmit}
                 >
-                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000]">
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-[#000000] dark:text-zinc-100">
                     Nome
-                    <span className="rounded-md border border-black/10 bg-white shadow-sm">
+                    <span className="rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-sm">
                       <Input
                         name="nome"
                         placeholder="Nome do curso"
@@ -276,7 +280,7 @@ const Home = () => {
                     </span>
                   </label>
 
-                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700">
+                  <label className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                     Icone PNG
                     <input
                       ref={editCourseFileInputRef}
@@ -287,7 +291,7 @@ const Home = () => {
                         setEditCourseError("");
                         setEditCourseSuccess("");
                       }}
-                      className="min-h-10 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
+                      className="min-h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-medium outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#F0F0E9] dark:file:bg-zinc-700 file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-[#B95758] dark:file:text-rose-300 focus:border-[#B95758] focus:ring-2 focus:ring-[#B95758]/20"
                     />
                   </label>
 
@@ -303,7 +307,7 @@ const Home = () => {
                   <button
                     type="button"
                     onClick={resetCourseEdit}
-                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-4 py-2 text-sm font-bold text-[#6f625d] shadow-sm transition hover:bg-[#F0F0E9] lg:w-auto"
+                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-bold text-[#6f625d] dark:text-zinc-400 shadow-sm transition hover:bg-[#F0F0E9] dark:hover:bg-zinc-700 lg:w-auto"
                   >
                     <X className="h-4 w-4" aria-hidden="true" />
                     Cancelar
@@ -311,7 +315,7 @@ const Home = () => {
                 </form>
 
                 {editCourseError && (
-                  <p className="mt-3 text-sm font-semibold text-[#B95758]">
+                  <p className="mt-3 text-sm font-semibold text-[#B95758] dark:text-rose-300">
                     {editCourseError}
                   </p>
                 )}
@@ -320,13 +324,13 @@ const Home = () => {
           </AnimatePresence>
 
           {!editingCourse && editCourseSuccess && (
-            <p className="mb-4 text-center text-sm font-semibold text-green-700">
+            <p className="mb-4 text-center text-sm font-semibold text-green-700 dark:text-green-400">
               {editCourseSuccess}
             </p>
           )}
 
           {courseActionError && (
-            <p className="mb-4 text-center text-sm font-semibold text-[#B95758]">
+            <p className="mb-4 text-center text-sm font-semibold text-[#B95758] dark:text-rose-300">
               {courseActionError}
             </p>
           )}
@@ -334,10 +338,10 @@ const Home = () => {
             <button
               onClick={() => goPage(-1)}
               disabled={total <= 1}
-              className="mx-2 hidden h-12 w-12 items-center justify-center rounded-full bg-white/40 transition hover:bg-white disabled:opacity-40 md:flex"
+              className="mx-2 hidden h-12 w-12 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-800/40 transition hover:bg-white dark:hover:bg-zinc-700 disabled:opacity-40 md:flex"
               aria-label="Pagina anterior"
             >
-              <Icon name="left" className="h-6 w-6 text-black" />
+              <Icon name="left" className="h-6 w-6 text-black dark:text-zinc-100" />
             </button>
 
             {/* Mantem espaco real para 3 cards de 20rem sem eles estourarem as colunas. */}
@@ -359,7 +363,7 @@ const Home = () => {
                         onClick={() => startCourseEdit(curso)}
                         aria-label={`Editar curso ${curso.titulo}`}
                         title="Editar curso"
-                        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-[#B95758] shadow-sm transition hover:bg-[#F0F0E9] hover:text-[#9f3f40]"
+                        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 dark:bg-zinc-800/95 text-[#B95758] dark:text-rose-300 shadow-sm transition hover:bg-[#F0F0E9] dark:hover:bg-zinc-700 hover:text-[#9f3f40] dark:hover:text-rose-300"
                       >
                         <SquarePen className="h-4 w-4" strokeWidth={2.4} />
                       </button>
@@ -370,7 +374,7 @@ const Home = () => {
                         onClick={() => deletarCurso(curso.id)}
                         aria-label={`Deletar curso ${curso.titulo}`}
                         title="Deletar curso"
-                        className="absolute top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white"
+                        className="absolute top-3 z-10 flex h-9 w-9 items-center justify-center rounded-md border border-white/40 bg-white/95 dark:bg-zinc-800/95 text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white"
                         style={{ right: "3.75rem" }}
                       >
                         <Trash2 className="h-4 w-4" strokeWidth={2.4} />
@@ -381,7 +385,7 @@ const Home = () => {
               ))}
 
               {!cursosFiltrados.length && (
-                <p className="col-span-full rounded-lg bg-white/80 px-4 py-3 text-center text-gray-600 shadow-sm">
+                <p className="col-span-full rounded-lg bg-white/80 dark:bg-zinc-800/80 px-4 py-3 text-center text-gray-600 dark:text-zinc-300 shadow-sm">
                   {search
                     ? `Nenhum curso encontrado para "${search}".`
                     : "Nenhum curso cadastrado no momento."}
@@ -392,10 +396,10 @@ const Home = () => {
             <button
               onClick={() => goPage(1)}
               disabled={total <= 1}
-              className="mx-2 hidden h-12 w-12 items-center justify-center rounded-full bg-white/40 transition hover:bg-white disabled:opacity-40 md:flex"
+              className="mx-2 hidden h-12 w-12 items-center justify-center rounded-full bg-white/40 dark:bg-zinc-800/40 transition hover:bg-white dark:hover:bg-zinc-700 disabled:opacity-40 md:flex"
               aria-label="Proxima pagina"
             >
-              <Icon name="right" className="h-6 w-6 text-black" />
+              <Icon name="right" className="h-6 w-6 text-black dark:text-zinc-100" />
             </button>
           </div>
 
@@ -408,10 +412,10 @@ const Home = () => {
                 <button
                   key={label}
                   onClick={() => goPage(step)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white dark:bg-zinc-800 shadow"
                   aria-label={label}
                 >
-                  <Icon name={icon} className="h-6 w-6 text-black" />
+                  <Icon name={icon} className="h-6 w-6 text-black dark:text-zinc-100" />
                 </button>
               ))}
             </div>
@@ -427,7 +431,7 @@ const Home = () => {
                     aria-label={`Ir para pagina ${i + 1}`}
                     className={`flex h-10 w-10 items-center justify-center rounded-md text-center font-medium ${page === i
                       ? "bg-yellow-500 text-white shadow-md"
-                      : "bg-white text-gray-600 hover:bg-gray-200"
+                      : "bg-white dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
                       }`}
                   >
                     {i + 1}

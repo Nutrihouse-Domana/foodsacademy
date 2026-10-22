@@ -5,10 +5,10 @@ const multer = require('multer');
 
 const { query, sql } = require('../db');
 const asyncRoute = require('./asyncRoute');
+// A exclusao e a resolucao da pasta ficam na camada de servico.
+const { buildVideoDirectory, deleteVideo } = require('../services/videoService');
 
 const router = express.Router();
-const publicRootDir = path.join(__dirname, '..', '..');
-const videosCursosDir = path.join(publicRootDir, 'videos_cursos');
 const MAX_MP4_SIZE = 100 * 1024 * 1024;
 
 // Mantem a troca de video alinhada com o upload de novos videos por modulo.
@@ -75,20 +75,6 @@ const parseVideoPayload = (body) => {
   return body || {};
 };
 
-const normalizePathParts = (value) =>
-  String(value || '')
-    .replace(/\\/g, '/')
-    .split('/')
-    .map((part) => path.basename(part.trim()))
-    .filter((part) => part && part !== '.' && part !== '..');
-
-const sanitizeFolderName = (value) =>
-  String(value || '')
-    .trim()
-    .replace(/[<>:"/\\|?*\x00-\x1F]+/g, '_')
-    .replace(/\s+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
 const sanitizeVideoFileName = (fileName) => {
   const baseName = path.parse(String(fileName || 'video')).name;
   const safeName = baseName
@@ -125,26 +111,6 @@ const getUniqueFileName = async (directory, fileName) => {
       return nextFileName;
     }
   }
-};
-
-const getModuloFolderName = (video) => {
-  const caminhoParts = normalizePathParts(video.modulo_caminho);
-
-  return caminhoParts[caminhoParts.length - 1] || sanitizeFolderName(video.modulo_titulo);
-};
-
-const buildVideoDirectory = (video) => {
-  const coursePathParts = normalizePathParts(video.curso_caminho);
-  const moduloFolder = video.id_modulo ? getModuloFolderName(video) : '';
-
-  if (!coursePathParts.length || (video.id_modulo && !moduloFolder)) return null;
-
-  const relativeParts = moduloFolder ? [...coursePathParts, moduloFolder] : coursePathParts;
-
-  return {
-    fullPath: path.join(videosCursosDir, ...relativeParts),
-    relativeParts,
-  };
 };
 
 const isExternalVideoUrl = (url) => /^https?:\/\//i.test(String(url || ''));
@@ -345,6 +311,21 @@ router.get(
     );
 
     res.json(resultado?.total ?? 0);
+  })
+);
+
+// A autenticacao LDAP e aplicada no servidor; apenas administradores podem excluir.
+router.delete(
+  '/videos/:id',
+  requireAdmin,
+  asyncRoute('Erro ao excluir video e arquivo do servidor', async (req, res) => {
+    const idVideo = Number(req.params.id);
+    if (!Number.isInteger(idVideo) || idVideo <= 0 || idVideo > 2147483647) {
+      return res.status(400).json({ error: 'ID do video invalido.' });
+    }
+    const video = await deleteVideo(idVideo);
+    if (!video) return res.status(404).json({ error: 'Video nao encontrado.' });
+    return res.json({ message: 'Video excluido com sucesso.', id: video.id });
   })
 );
 

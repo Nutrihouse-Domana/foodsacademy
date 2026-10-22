@@ -1,0 +1,34 @@
+{
+  "id": "./",
+  "name": "Foods Academy",
+  "short_name": "Foods Academy",
+  "description": "Plataforma de aprendizagem corporativa da Nutrihouse e Domaná.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "/manifest.json",
+      "id": "https://foodsacademy.com.br/"
+    }
+  ],
+  "prefer_related_applications": false,
+  "theme_color": "#FAF9F7",
+  "background_color": "#FAF9F7",
+  "icons": [
+    {
+      "src": "icons/logo_novo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/logo_novo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

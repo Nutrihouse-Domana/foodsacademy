@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import * as XLSX from "xlsx";
 import { Download } from "lucide-react";
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 export default function ExportButton({ dados = [] }) {
   const [loading, setLoading] = useState(false);
   const contatos = Array.isArray(dados) ? dados : [];
@@ -38,7 +39,7 @@ export default function ExportButton({ dados = [] }) {
       disabled={loading || contatos.length === 0}
       aria-label="Exportar contatos para Excel"
       title="Exportar contatos para Excel"
-      className="flex h-12 w-12 items-center justify-center rounded-md border border-black/10 bg-white/85 text-[#B95758] shadow-sm backdrop-blur transition hover:bg-white hover:text-[#9f3f40] disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-12 w-12 items-center justify-center rounded-md border border-black/10 dark:border-white/15 bg-white/85 dark:bg-zinc-800/85 text-[#B95758] dark:text-rose-300 shadow-sm backdrop-blur transition hover:bg-white dark:hover:bg-zinc-700 hover:text-[#9f3f40] dark:hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-60"
     >
       <Download className="h-6 w-6" strokeWidth={2.4} />
     </button>

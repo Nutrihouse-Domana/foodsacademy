@@ -17,6 +17,7 @@ import MaterialPage from "./pages/MaterialPage";
 import { UsuarioProvider, useUsuario } from "./contexts/UsuarioContext";
 import { fetchJson } from "./utils/app";
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const PrivateRoute = () => {
   const [status, setStatus] = useState("checking");
   const location = useLocation();
@@ -46,8 +47,8 @@ const PrivateRoute = () => {
 
   if (status === "checking") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#FAF9F7] px-4 text-center">
-        <h1 className="text-xl font-semibold text-gray-700">Validando acesso...</h1>
+      <main className="flex min-h-screen items-center justify-center bg-[#FAF9F7] dark:bg-zinc-950 px-4 text-center">
+        <h1 className="text-xl font-semibold text-gray-700 dark:text-zinc-300">Validando acesso...</h1>
       </main>
     );
   }

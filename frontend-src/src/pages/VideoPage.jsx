@@ -70,6 +70,7 @@ const withPlayableVideoUrl = (video) => {
     url: `/videos_cursos${video.url.startsWith("/") ? "" : "/"}${video.url}`,
   };
 };
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const VideoPage = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(emptyCourse);
@@ -187,6 +188,26 @@ const VideoPage = () => {
     );
   };
 
+  // Remove o video das listas, interrompe o player e limpa o progresso salvo.
+  const handleVideoDeleted = (idVideo) => {
+    const keepVideo = (video) => String(video.id) !== String(idVideo);
+    setCourse((prev) => ({
+      ...prev,
+      videos: (prev.videos || []).filter(keepVideo),
+      modulos: (prev.modulos || []).map((modulo) => ({
+        ...modulo,
+        videos: (modulo.videos || []).filter(keepVideo),
+      })),
+    }));
+    setSelectedVideo((prev) => prev && !keepVideo(prev) ? null : prev);
+    setWatchedVideos((prev) => {
+      const next = { ...prev };
+      delete next[idVideo];
+      saveStoredWatchedVideos(id, next);
+      return next;
+    });
+  };
+
   const sidebarProps = {
     modulos: course.temModulos ? course.modulos : [],
     videos: course.temModulos ? [] : course.videos,
@@ -196,10 +217,11 @@ const VideoPage = () => {
     onModuloUpdated: handleModuloUpdated,
     onVideoCreated: handleVideoCreated,
     onVideoUpdated: handleVideoUpdated,
+    onVideoDeleted: handleVideoDeleted,
   };
 
   const Page = ({ children, sidebar = sidebarProps }) => (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
       <Sidebar {...sidebar} />
       <main className="flex min-h-screen w-full flex-col items-center px-4 pb-8 pt-24 sm:px-6 md:pl-[332px] md:pr-8 md:pt-8">
         {children}
@@ -210,7 +232,7 @@ const VideoPage = () => {
   if (loading || (!course.temModulos && !course.videos.length)) {
     return (
       <Page sidebar={loading ? sidebarProps : {}}>
-        <h1 className="m-auto text-center text-xl font-bold text-gray-800 sm:text-2xl md:text-3xl">
+        <h1 className="m-auto text-center text-xl font-bold text-gray-800 dark:text-zinc-100 sm:text-2xl md:text-3xl">
           {loading
             ? "Carregando vídeo..."
             : "Nenhum vídeo encontrado para este curso"}
@@ -221,8 +243,9 @@ const VideoPage = () => {
 
   return (
     <Page>
-      <h1 className="mb-5 max-w-5xl break-words text-center text-xl font-bold text-gray-800 sm:text-2xl md:mb-6 md:text-3xl">
-        {selectedVideo ? selectedVideo.titulo : "Carregando vídeo..."}
+      <h1 className="mb-5 max-w-5xl break-words text-center text-xl font-bold text-gray-800 dark:text-zinc-100 sm:text-2xl md:mb-6 md:text-3xl">
+        {/* A exclusao do video selecionado deixa o player pronto para outra escolha. */}
+        {selectedVideo ? selectedVideo.titulo : "Selecione um video no menu"}
       </h1>
 
       <div className="aspect-video w-full max-w-5xl overflow-hidden rounded-lg bg-black shadow-2xl sm:rounded-xl">

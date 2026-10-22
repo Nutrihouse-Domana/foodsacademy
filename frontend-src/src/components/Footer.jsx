@@ -12,9 +12,10 @@ const links = [
   ],
 ];
 
+// As variantes dark mantem o contraste dos fundos, textos e controles.
 const Footer = () => (
-  <footer className="w-full border-t bg-[#80B5B4] py-6">
-    <div className="mx-auto grid w-full max-w-screen-xl gap-8 px-4 text-center justify-items-center text-gray-700 sm:px-6 md:grid-cols-3 md:text-left lg:px-8">
+  <footer className="w-full border-t bg-[#80B5B4] dark:bg-zinc-800 py-6">
+    <div className="mx-auto grid w-full max-w-screen-xl gap-8 px-4 text-center justify-items-center text-gray-700 dark:text-zinc-300 sm:px-6 md:grid-cols-3 md:text-left lg:px-8">
       <div className="flex flex-col items-center md:items-start text-center">
         <img src={Logo} alt="NutriHouse Logo" className="mb-4 w-28" />
         <span className="text-sm">
